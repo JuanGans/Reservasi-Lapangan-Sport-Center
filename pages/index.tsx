@@ -139,7 +139,7 @@ export default function Home() {
           <div className="flex flex-wrap justify-center gap-8">
             {[
               ["Alifia Bilqi Firajulkha", "2241720024", "https://i.pinimg.com/originals/0b/7a/08/0b7a0825860020c2deada55de1b938c9.gif"],
-              ["Ellois Karina Handoyo", "2241720154", "https://i.pinimg.com/originals/9b/ac/bd/9bacbd053fd1ae07faa9a5557d3cf5b4.gif"],
+              ["Ellois Karina Handoyo", "2241720154", "/ello.jpg"],
               ["Juan Felix A. N. T.", "2241720042", "/juan.jpg"],
               ["Mochamad Imam Hanafi", "2241720151", "/imam.jpg"],
               ["Zhubair Abel F. M. Z.", "2141720248", "https://www.icegif.com/wp-content/uploads/2022/08/icegif-243.gif"],
