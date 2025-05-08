@@ -1,4 +1,3 @@
-// components/UploadPaymentProofModal.tsx
 import React, { useState } from "react";
 import { Check, Upload, AlertCircle } from "lucide-react";
 
@@ -88,7 +87,7 @@ const UploadPaymentProofModal: React.FC<Props> = ({ isOpen, onClose }) => {
           <label className="block border-dashed border-2 p-4 rounded-lg text-center cursor-pointer hover:bg-gray-50">
             <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
             {proof ? (
-              <div className="text-blue-600 font-medium">{fileName}</div>
+              <div className="font-medium text-[#01305D]">{fileName}</div>
             ) : (
               <div className="text-gray-500">Klik untuk unggah bukti (JPG/PNG/PDF)</div>
             )}
@@ -103,7 +102,8 @@ const UploadPaymentProofModal: React.FC<Props> = ({ isOpen, onClose }) => {
 
           <button
             type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg transition-all"
+            className="w-full py-2 rounded-lg transition-all"
+            style={{ backgroundColor: "#01305D" }}
             disabled={loading}
           >
             {loading ? "Mengunggah..." : "Konfirmasi Pembayaran"}
