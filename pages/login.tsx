@@ -24,9 +24,9 @@ export default function Login() {
     if (res.ok) {
       localStorage.setItem("token", data.token);
       if (role === "admin") {
-        router.push("/dashboard");
+        router.push("/admin");
       } else {
-        router.push("/userdashboard");
+        router.push("/user");
       }
     } else {
       setError(data.message || "Gagal login");
@@ -34,17 +34,10 @@ export default function Login() {
   };
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center bg-cover bg-center font-sans"
-      style={{ backgroundImage: `url('/bg1.jpg')` }}
-    >
+    <div className="min-h-screen flex items-center justify-center bg-cover bg-center font-sans" style={{ backgroundImage: `url('/bg1.jpg')` }}>
       <div className="w-full max-w-md bg-white/30 backdrop-blur-lg shadow-lg rounded-lg p-10 relative">
         {/* Tombol Home */}
-        <button
-          onClick={() => router.push("/")}
-          className="absolute top-4 left-4 text-blue-900 hover:text-blue-700 transition"
-          title="Kembali ke Beranda"
-        >
+        <button onClick={() => router.push("/")} className="absolute top-4 left-4 text-blue-900 hover:text-blue-700 transition" title="Kembali ke Beranda">
           <Home size={24} />
         </button>
 
@@ -75,11 +68,7 @@ export default function Login() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-600"
-              >
+              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-600">
                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
@@ -88,33 +77,23 @@ export default function Login() {
           {/* Dropdown untuk memilih role */}
           <div>
             <label className="block text-sm font-semibold text-gray-100">Login sebagai</label>
-            <select
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              className="w-full border border-gray-300 rounded px-4 py-2 mt-1 text-black focus:outline-none focus:ring-2 focus:ring-blue-400"
-              required
-            >
+            <select value={role} onChange={(e) => setRole(e.target.value)} className="w-full border border-gray-300 rounded px-4 py-2 mt-1 text-black focus:outline-none focus:ring-2 focus:ring-blue-400" required>
               <option value="member">Member</option>
               <option value="admin">Admin</option>
             </select>
           </div>
 
           <div className="flex items-center justify-between text-sm text-gray-100">
-            <a href="/lupa-password" className="text-blue-300 hover:underline">Lupa Password</a>
+            <a href="/lupa-password" className="text-blue-300 hover:underline">
+              Lupa Password
+            </a>
           </div>
 
-          <button
-            type="submit"
-            className="w-full bg-blue-900 text-white py-2 rounded hover:bg-blue-800 transition"
-          >
+          <button type="submit" className="w-full bg-blue-900 text-white py-2 rounded hover:bg-blue-800 transition">
             Login
           </button>
 
-          <button
-            type="button"
-            onClick={() => router.push("/register")}
-            className="w-full bg-gray-600 text-white py-2 rounded"
-          >
+          <button type="button" onClick={() => router.push("/register")} className="w-full bg-gray-600 text-white py-2 rounded">
             Registrasi
           </button>
 
