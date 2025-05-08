@@ -8,10 +8,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ message: "Method Not Allowed" });
   }
 
-  const { email, password } = req.body;
+  const { email, password, role } = req.body;
 
-  if (!email || !password) {
-    return res.status(400).json({ message: "Email and password are required" });
+  if (!email || !password || !role) {
+    return res.status(400).json({ message: "Email, password, and role are required" });
   }
 
   try {
@@ -22,6 +22,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       database: "futsal_management",
     });
 
+    // Cari user berdasarkan email
     const [rows] = await connection.execute("SELECT * FROM users WHERE email = ?", [email]);
 
     await connection.end();
@@ -30,16 +31,32 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    const user = rows[0] as { id: number; email: string; password: string };
+    const user = rows[0] as {
+      id: number;
+      email: string;
+      password: string;
+      role: string;
+    };
 
+    // Cek password
     const passwordMatch = await bcrypt.compare(password, user.password);
     if (!passwordMatch) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    const token = jwt.sign({ id: user.id, email: user.email }, "secret-key", { expiresIn: "1h" });
+    // Validasi role yang dipilih saat login
+    if (user.role !== role) {
+      return res.status(403).json({ message: "Role tidak sesuai dengan akun" });
+    }
 
-    res.status(200).json({ message: "Login successful", token });
+    // Generate token
+    const token = jwt.sign(
+      { id: user.id, email: user.email, role: user.role },
+      "secret-key",
+      { expiresIn: "1h" }
+    );
+
+    res.status(200).json({ message: "Login successful", token, role: user.role });
   } catch (error) {
     console.error("Error logging in:", error);
     res.status(500).json({ message: "Internal Server Error" });

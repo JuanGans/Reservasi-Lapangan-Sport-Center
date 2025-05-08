@@ -7,6 +7,7 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [role, setRole] = useState("member"); // Tambahan state untuk role
   const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -16,13 +17,17 @@ export default function Login() {
     const res = await fetch("/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, password, role }),
     });
 
     const data = await res.json();
     if (res.ok) {
       localStorage.setItem("token", data.token);
-      router.push("/dashboard");
+      if (role === "admin") {
+        router.push("/dashboard");
+      } else {
+        router.push("/userdashboard");
+      }
     } else {
       setError(data.message || "Gagal login");
     }
@@ -78,6 +83,20 @@ export default function Login() {
                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
+          </div>
+
+          {/* Dropdown untuk memilih role */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-100">Login sebagai</label>
+            <select
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              className="w-full border border-gray-300 rounded px-4 py-2 mt-1 text-black focus:outline-none focus:ring-2 focus:ring-blue-400"
+              required
+            >
+              <option value="member">Member</option>
+              <option value="admin">Admin</option>
+            </select>
           </div>
 
           <div className="flex items-center justify-between text-sm text-gray-100">
