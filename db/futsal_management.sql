@@ -99,6 +99,24 @@ INSERT INTO `users` (`id`, `name`, `email`, `password`, `role`, `created_at`) VA
 (7, '123', '123@gmail.com', '$2b$10$MTdpXWQ5PNLufCBLDMews.auGSnyA9Id9/gP9k/En4570Qv8.Lsai', 'member', '2025-05-08 11:25:34');
 
 --
+-- Table structure for table payments
+--
+
+CREATE TABLE payments (
+  id int(11) NOT NULL,
+  user_id int(11) NOT NULL,
+  booking_id int(11) NOT NULL,
+  amount decimal(10,2) NOT NULL,
+  amount_paid decimal(10,2) DEFAULT 0,
+  total_due decimal(10,2) NOT NULL,
+  payment_type enum('dp','full','online_dp') DEFAULT 'full',
+  status enum('pending','paid','declined') DEFAULT 'pending',
+  proof_image varchar(255) DEFAULT NULL,
+  payment_token varchar(255) DEFAULT NULL,
+  created_at timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
 -- Indexes for dumped tables
 --
 
@@ -130,6 +148,14 @@ ALTER TABLE `users`
   ADD UNIQUE KEY `email` (`email`);
 
 --
+-- Indexes for table payments
+--
+ALTER TABLE payments
+  ADD PRIMARY KEY (id),
+  ADD KEY user_id (user_id),
+  ADD KEY booking_id (booking_id);
+
+--
 -- AUTO_INCREMENT for dumped tables
 --
 
@@ -158,6 +184,12 @@ ALTER TABLE `users`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
+-- AUTO_INCREMENT for table payments
+--
+ALTER TABLE payments
+  MODIFY id int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- Constraints for dumped tables
 --
 
@@ -168,6 +200,14 @@ ALTER TABLE `bookings`
   ADD CONSTRAINT `bookings_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
   ADD CONSTRAINT `bookings_ibfk_2` FOREIGN KEY (`facility_id`) REFERENCES `facilities` (`id`);
 COMMIT;
+
+--
+-- Constraints for table payments
+--
+ALTER TABLE payments
+  ADD CONSTRAINT payments_ibfk_1 FOREIGN KEY (user_id) REFERENCES users (id),
+  ADD CONSTRAINT payments_ibfk_2 FOREIGN KEY (booking_id) REFERENCES bookings (id);
+
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

@@ -3,7 +3,7 @@ import React from "react";
 const Header: React.FC = () => {
   return (
     // HEADER
-    <header className="flex justify-end items-center space-x-6 mb-6">
+    <header className="w-full flex justify-end items-center space-x-6 px-6 pt-4 mb-6">
       <button aria-label="Search" className="text-gray-500 hover:text-gray-700 transition-colors duration-200">
         <i className="fas fa-search text-lg"></i>
       </button>
