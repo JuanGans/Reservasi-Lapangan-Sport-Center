@@ -33,7 +33,7 @@ const Sidebar: React.FC<roleProps> = ({ role }) => {
             <span>Dashboard</span>
           </div>
         </Link>
-        <Link href="/data-pemesanan">
+        <Link href="/booking">
           <div className="flex items-center space-x-2 hover:text-[#0c3a66] transition-colors duration-200 px-4 py-2">
             <i className="fas fa-shopping-cart text-base"></i>
             <span>Booking</span>
