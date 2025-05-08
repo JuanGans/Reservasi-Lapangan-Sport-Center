@@ -39,11 +39,11 @@ CREATE TABLE bookings (
 
 -- TABEL TRANSACTIONS
 CREATE TABLE transactions (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    type ENUM('credit', 'debit') NOT NULL,
-    amount DECIMAL(10,2) NOT NULL,
-    description TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  type ENUM('credit', 'debit', 'income', 'expense') NOT NULL,
+  amount DECIMAL(10,2) NOT NULL,
+  description VARCHAR(255),
+  date DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
 -- TABEL SESSIONS (Opsional untuk login sistem)
