@@ -29,7 +29,7 @@ const Profile = () => {
     address: 'United State, America',
     username: '3381948382',
     password: '•••••••••••••',
-    profilePictureUrl: '/api/placeholder/100/100' // Using placeholder image instead of external URL
+    profilePictureUrl: '/ello.jpg'
   });
 
   // Modal animation handlers
