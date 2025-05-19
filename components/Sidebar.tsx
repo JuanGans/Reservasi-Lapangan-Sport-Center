@@ -7,14 +7,13 @@ interface roleProps {
 
 const Sidebar: React.FC<roleProps> = ({ role }) => {
   return (
-    // Sidebar
     <aside className="w-64 bg-white border-r border-gray-200 flex flex-col px-6 py-8">
       {/* JTI Sport Center */}
       <div className="flex items-center space-x-3 px-2 mb-6">
         <img
           alt="Politeknik Negeri Malang - JTI Sport Center"
           className="w-8 h-8"
-          src="/polinema.png" // Use a local image path or a valid URL
+          src="/polinema.png"
         />
         <div>
           <p className="text-xs font-bold text-gray-900 leading-none mb-1">
@@ -33,7 +32,8 @@ const Sidebar: React.FC<roleProps> = ({ role }) => {
             <span>Dashboard</span>
           </div>
         </Link>
-        <Link href="/booking">
+
+        <Link href="/admin/reservations">
           <div className="flex items-center space-x-2 hover:text-[#0c3a66] transition-colors duration-200 px-4 py-2">
             <i className="fas fa-shopping-cart text-base"></i>
             <span>Booking</span>
@@ -49,7 +49,8 @@ const Sidebar: React.FC<roleProps> = ({ role }) => {
             </div>
           </Link>
         )}
-        <Link href="/riwayat-pemesanan">
+
+        <Link href="/riwayat-pemesanaan">
           <div className="flex items-center space-x-2 hover:text-[#0c3a66] transition-colors duration-200 px-4 py-2">
             <i className="fas fa-history text-base"></i>
             <span>History</span>

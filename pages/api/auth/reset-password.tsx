@@ -18,7 +18,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     host: "localhost",
     user: "root",
     password: "",
-    database: "sport_center",
+    database: "futsal_management",
     });
 
     const [rows] = await connection.execute("SELECT * FROM users WHERE email = ?", [email]);
