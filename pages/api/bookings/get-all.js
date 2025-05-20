@@ -8,15 +8,21 @@ export default async function handler(req, res) {
   try {
     const connection = await mysql.createConnection({
       host: "localhost",
-      user: "root", // Ganti sesuai dengan user database
-      password: "", // Ganti sesuai dengan password database
-      database: "futsal_management", // Ganti sesuai dengan nama database kamu
+      user: "root", // Ganti sesuai user
+      password: "", // Ganti sesuai password
+      database: "futsal_management",
     });
 
     const [rows] = await connection.execute("SELECT * FROM bookings");
+
+    const bookings = rows.map((row) => ({
+      ...row,
+      time_slots: row.time_slots ? JSON.parse(row.time_slots) : [],
+    }));
+
     await connection.end();
 
-    res.status(200).json(rows);
+    res.status(200).json(bookings);
   } catch (error) {
     console.error("Error fetching bookings:", error);
     res.status(500).json({ message: "Internal Server Error" });
