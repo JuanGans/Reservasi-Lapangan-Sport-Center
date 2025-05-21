@@ -5,6 +5,7 @@ import Head from "next/head";
 export default function Home() {
   const [selectedField, setSelectedField] = useState<any>(null);
 
+  // DATA DUMMY LAPANGAN
   const fields = [
     {
       name: "Lapangan Futsal A",
@@ -40,10 +41,6 @@ export default function Home() {
 
   return (
     <div className="scroll-smooth font-[Poppins]">
-      <Head>
-        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" />
-      </Head>
-
       {/* Hero + Navbar */}
       <section id="home" className="relative min-h-screen flex flex-col items-center justify-center bg-cover bg-center text-center px-4" style={{ backgroundImage: "url('/futsal.jpg')" }}>
         <nav className="absolute top-0 left-0 right-0 z-50 py-4 px-6 flex justify-between items-center">
