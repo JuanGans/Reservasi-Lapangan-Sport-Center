@@ -7,12 +7,16 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "seed": "ts-node prisma/seed.ts"
+    "seed": "ts-node prisma/seed/index.ts"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.4",
     "@prisma/client": "^6.8.2",
     "bcryptjs": "^3.0.2",
+    "cookie": "^1.0.2",
+    "formidable": "^3.5.4",
+    "framer-motion": "^12.12.2",
+    "jose": "^6.0.11",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.506.0",
     "multer": "^1.4.5-lts.2",
@@ -21,6 +25,7 @@
     "next-connect": "^1.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-intersection-observer": "^9.16.0",
     "react-modal": "^3.16.3",
     "react-toastify": "^11.0.5"
   },
@@ -28,6 +33,7 @@
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
     "@types/axios": "^0.9.36",
+    "@types/formidable": "^3.4.5",
     "@types/jsonwebtoken": "^9.0.9",
     "@types/multer": "^1.4.12",
     "@types/node": "^20.17.50",

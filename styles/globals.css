@@ -17,8 +17,26 @@
   }
 }
 
+html {
+  scroll-behavior: smooth;
+  scrollbar-gutter: stable;
+}
+
 body {
   color: var(--foreground);
   background: var(--background);
-  /* font-family: Arial, Helvetica, sans-serif; */
+}
+
+/* global.css atau tailwind.css */
+::-webkit-scrollbar {
+  width: 6px; /* Atur ketebalan scrollbar */
+}
+
+::-webkit-scrollbar-track {
+  background: transparent; /* Warna latar belakang track scrollbar */
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.3); /* Warna thumb */
+  border-radius: 10px; /* Biar membulat */
 }

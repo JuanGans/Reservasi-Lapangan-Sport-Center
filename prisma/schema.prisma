@@ -1,25 +1,124 @@
+// GENERATOR PRISMA
 generator client {
   provider = "prisma-client-js"
 }
 
+// DATASOURCE PRISMA
 datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id        Int      @id @default(autoincrement())
-  name      String
-  email     String   @unique
-  createdAt DateTime @default(now())
-  bookings  Booking[]
+// MODEL USER
+model Users {
+  id          Int            @id @default(autoincrement())
+  fullname    String         @db.VarChar(255)
+  email       String         @unique @db.VarChar(255)
+  username    String         @unique @db.VarChar(100)
+  password    String         @db.VarChar(255)
+  no_hp       String         @db.VarChar(15)
+  user_img    String         @db.VarChar(255)
+  role        Role           @default(member)
+  bookings    Bookings[]
+  notifications Notifications[]
 }
 
-model Booking {
-  id        Int      @id @default(autoincrement())
-  user      User     @relation(fields: [userId], references: [id])
-  userId    Int
-  court     String
-  date      DateTime
-  createdAt DateTime @default(now())
+// ENUM ROLE
+enum Role {
+  member
+  admin
+}
+
+// MODEL FACILITY
+model Facilities {
+  id                Int       @id @default(autoincrement())
+  field_name        String    @db.VarChar(255)
+  field_desc        String    @db.VarChar(255)
+  field_image       String?   @db.VarChar(1000)
+  price_per_session Decimal   @db.Decimal(10,2)
+  avg_rating        Float     @default(0)
+  total_review      Int       @default(0)
+  bookings          Bookings[]
+}
+
+// MODEL BOOKING
+model Bookings {
+  id             Int              @id @default(autoincrement())
+  user           Users            @relation(fields: [userId], references: [id])
+  userId         Int
+  facility       Facilities       @relation(fields: [facilityId], references: [id])
+  facilityId     Int
+  booking_date   DateTime
+  booking_status BookingStatus    @default(pending)
+  created_at     DateTime         @default(now())
+  updated_at     DateTime         @updatedAt
+  sessions       BookingSessions[]
+  transaction    Transactions?
+  review         Reviews?
+}
+
+// ENUM BOOKING STATUS
+enum BookingStatus {
+  pending
+  paid
+  canceled
+  completed
+}
+
+// MODEL BOOKING SESSION
+model BookingSessions {
+  id         Int      @id @default(autoincrement())
+  booking    Bookings  @relation(fields: [bookingId], references: [id])
+  bookingId  Int
+  start_time DateTime
+  end_time   DateTime
+}
+
+// MODEL TRANSACTION
+model Transactions {
+  id               Int               @id @default(autoincrement())
+  booking          Bookings          @relation(fields: [bookingId], references: [id])
+  bookingId        Int               @unique
+  total            Int
+  method_payment   PaymentMethod     @default(transfer)
+  created_at       DateTime          @default(now())
+  updated_at       DateTime          @updatedAt
+}
+
+// ENUM PAYMENT METHOD
+enum PaymentMethod {
+  transfer
+  credit_card
+  cash
+}
+
+// MODEL REVIEW
+model Reviews {
+  id         Int      @id @default(autoincrement())
+  booking    Bookings  @relation(fields: [bookingId], references: [id])
+  bookingId  Int      @unique
+  rating     Int
+  comment    String?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+// MODEL NOTIFICATION
+model Notifications {
+  id         Int              @id @default(autoincrement())
+  user       Users            @relation(fields: [userId], references: [id])
+  userId     Int
+  message    String
+  type       NotificationType @default(info)
+  is_read    Boolean          @default(false)
+  created_at DateTime         @default(now())
+  updated_at DateTime         @updatedAt
+}
+
+// ENUM NOTIFICATION TYPE
+enum NotificationType {
+  info
+  warning
+  success
+  danger
 }

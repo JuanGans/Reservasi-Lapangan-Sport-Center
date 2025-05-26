@@ -1,59 +1,76 @@
 import React, { useEffect, useState } from "react";
-import Sidebar from "../../components/Sidebar";
-import Header from "../../components/Header";
-import StatusCard from "../../components/StatusCard";
-import BookingTable from "../../components/BookingTable";
+import Carousel from "@/components/dashboard/Carousel";
+import BookingTable from "@/components/dashboard/BookingTable";
+import DashboardLayout from "@/layout/DashboardLayout";
+import { useRouter } from "next/router";
+import Toast from "@/components/toast/Toast";
 
-interface Booking {
-  id: number;
-  court: string;
-  date: string;
-  time: string;
-  duration: number;
-  price: number;
-  status: string;
-  phone_number: string;
-}
+type BookingStatus = "all" | "pending" | "paid" | "canceled" | "completed";
 
-const AdminPage: React.FC = () => {
-  const [bookings, setBookings] = useState<Booking[]>([]);
+const MemberPage: React.FC = () => {
+  const [facilities, setFacilities] = useState<any[]>([]);
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
+  const [bookings, setBookings] = useState<any[]>([]);
+  const [filterStatus, setFilterStatus] = useState<BookingStatus>("all");
+  const router = useRouter();
 
   useEffect(() => {
-    const fetchBookings = async () => {
-      try {
-        const res = await fetch("/api/bookings/get-all");
-        const data = await res.json();
-        setBookings(data);
-      } catch (error) {
-        console.error("Gagal mengambil data bookings:", error);
-      }
-    };
+    const { restricted, repeat } = router.query;
+    if (restricted === "1") {
+      setToast({ message: "Tidak dapat akses, anda bukan member!", type: "error" });
+      router.replace(router.pathname); // Bersihkan query
+    } else if (repeat === "1") {
+      setToast({ message: "Logout dengan benar!", type: "error" });
+      router.replace(router.pathname); // Bersihkan query
+    }
+  }, [router]);
+
+  // Mengambil data fasilitas
+  useEffect(() => {
+    async function fetchFacilities() {
+      const res = await fetch("/api/facilities/getAllFacilities");
+      const data = await res.json();
+      setFacilities(data);
+    }
+
+    fetchFacilities();
+  }, []);
+
+  // Mengambil data booking
+  useEffect(() => {
+    async function fetchBookings() {
+      const res = await fetch("/api/bookings/getAllBookings");
+      const data = await res.json();
+      setBookings(data);
+    }
 
     fetchBookings();
   }, []);
 
   return (
-    <div className="bg-[#f0f2f5] min-h-screen flex">
-      {/* SIDEBAR */}
-      <Sidebar role={"Admin"} />
+    <>
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+      <DashboardLayout title="Dashboard">
+        {/* Carousel Gambar Lapangan */}
+        <Carousel facilities={facilities} />
 
-      {/* MAIN */}
-      <main className="flex-1 p-6">
-        {/* HEADER */}
-        <Header />
+        {/* Filter Status Booking */}
+        <div className="mt-6">
+          <label className="mr-2 text-blue-900 font-semibold">Filter Status:</label>
+          <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value as BookingStatus)} className="border border-gray-300 rounded-md p-2 text-gray-500 text-xs cursor-pointer">
+            <option value="all">Semua</option>
+            <option value="pending">Menunggu Pembayaran</option>
+            <option value="paid">Selesai Membayar</option>
+            <option value="canceled">Dibatalkan</option>
+            <option value="completed">Selesai</option>
+          </select>
+        </div>
 
-        {/* STATUS CARD ADMIN */}
-        <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-          <StatusCard title="Menunggu" count={bookings.filter(b => b.status === "Pending").length} description="Total yang belum disetujui" icon="far fa-clock" />
-          <StatusCard title="Dikonfirmasi" count={bookings.filter(b => b.status === "Confirmed").length} description="Total barang yang siap diambil" icon="fas fa-check" />
-          <StatusCard title="Selesai" count={bookings.filter(b => b.status === "Done").length} description="Peminjaman yang sudah selesai" icon="fas fa-list-ul" />
-          <StatusCard title="Dibatalkan" count={bookings.filter(b => b.status === "Canceled").length} description="Peminjaman yang dibatalkan" icon="fas fa-lock" />
-        </section>
-
-        <BookingTable bookings={bookings} role={"Admin"} />
-      </main>
-    </div>
+        {/* Tabel Booking */}
+        <BookingTable bookings={bookings} filterStatus={filterStatus} />
+      </DashboardLayout>
+    </>
   );
 };
 
-export default AdminPage;
+export default MemberPage;
