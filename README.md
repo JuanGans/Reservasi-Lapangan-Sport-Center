@@ -2,7 +2,7 @@
 
 ## Logo
 
-<img src="./public/assets/logo/jtisportcenter_large.png" alt="JTI Sport Center Logo" style="width: 50%; height: auto;">
+<img src="./public/assets/logo/jtisportcenter_large.png" alt="JTI Sport Center Logo" style="width: 50%; height: auto; background-color: white; border-radius: 100%;">
 
 ## Overview
 
@@ -16,30 +16,56 @@
 
 ### Responsive Mobile
 
-<img src="./public/assets/overview/mobile_1.png" alt="JTI Sport Center Logo" style="height: 300px">
-<img src="./public/assets/overview/mobile_2.png" alt="JTI Sport Center Logo" style="height: 300px">
-<img src="./public/assets/overview/mobile_3.png" alt="JTI Sport Center Logo" style="height: 300px">
+<div style="display: flex; gap: 10px;">
+  <img src="./public/assets/overview/mobile_1.png" alt="JTI Sport Center Logo" style="height: 300px">
+  <img src="./public/assets/overview/mobile_2.png" alt="JTI Sport Center Logo" style="height: 300px">
+  <img src="./public/assets/overview/mobile_3.png" alt="JTI Sport Center Logo" style="height: 300px">
+</div>
 
 ## Tim Pengembang
 
-- Alifia Bilqi Firajulkha
-- Ellois Karina Handoyo
-- Juan Felix Antonio Nathan Tote
-- Mochamad Imam Hanafi
-- Zhubair Abhel Frisky Maulana Zidhane
+<div style="display: flex; gap: 10px; margin-bottom:20px;">
+  <img src="./public/assets/team/alifia_team.png" alt="Tim Pengembang" style="height: 100px">
+  <img src="./public/assets/team/ello_team.png" alt="Tim Pengembang" style="height: 100px">
+  <img src="./public/assets/team/juan_team.png" alt="Tim Pengembang" style="height: 100px">
+  <img src="./public/assets/team/imam_team.png" alt="Tim Pengembang" style="height: 100px">
+  <img src="./public/assets/team/abhel_team.png" alt="Tim Pengembang" style="height: 100px;">
+</div>
+
+- Alifia Bilqi Firajulkha (2241720024)
+- Ellois Karina Handoyo (2241720154)
+- Juan Felix Antonio Nathan Tote (2241720042)
+- Mochamad Imam Hanafi (2241720151)
+- Zhubair Abhel Frisky Maulana Zidhane (2141720248)
 
 ## Deskripsi Proyek
 
-Aplikasi web untuk sistem reservasi lapangan olahraga di Sport Center.
+Aplikasi web untuk sistem reservasi lapangan olahraga di Sport Center JTI Polinema.
 
 ## Teknologi yang Digunakan
 
-- Next.js
-- TypeScript
-- MySQL (Database)
-- Prisma (ORM)
-- Tailwind CSS
-- Node.js
+<div style="display: flex; gap: 10px; flex-wrap: wrap; margin: 20px 0;">
+  <img src="https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" alt="Node.js">
+  <img src="https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white" alt="Next.js">
+  <img src="https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript">
+  <img src="https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white" alt="MySQL">
+  <img src="https://img.shields.io/badge/Prisma-2D3748?style=for-the-badge&logo=prisma&logoColor=white" alt="Prisma">
+  <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind CSS">
+</div>
+
+## Tools
+
+<div style="display: flex; gap: 10px; flex-wrap: wrap;">
+  <img src="https://img.shields.io/badge/Laragon-0E83CD?style=for-the-badge&logo=laragon&logoColor=white" alt="Laragon">
+  <img src="https://img.shields.io/badge/XAMPP-FB7A24?style=for-the-badge&logo=xampp&logoColor=white" alt="XAMPP">
+  <img src="https://img.shields.io/badge/phpMyAdmin-6C78AF?style=for-the-badge&logo=phpmyadmin&logoColor=white" alt="phpMyAdmin">
+  <img src="https://img.shields.io/badge/Figma-F24E1E?style=for-the-badge&logo=figma&logoColor=white" alt="Figma">
+  <img src="https://img.shields.io/badge/VSCode-007ACC?style=for-the-badge&logo=visualstudiocode&logoColor=white" alt="VSCode">
+  <img src="https://img.shields.io/badge/Git-F05032?style=for-the-badge&logo=git&logoColor=white" alt="Git">
+  <img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub">
+  <img src="https://img.shields.io/badge/npm-CB3837?style=for-the-badge&logo=npm&logoColor=white" alt="NPM">
+  <img src="https://img.shields.io/badge/Yarn-2C8EBB?style=for-the-badge&logo=yarn&logoColor=white" alt="Yarn">
+</div>
 
 ## Persyaratan Sistem
 
