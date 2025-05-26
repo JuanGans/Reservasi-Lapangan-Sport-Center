@@ -2,7 +2,7 @@
 
 ## Logo
 
-<img src="./public/assets/logo/jtisportcenter_large.png" alt="JTI Sport Center Logo" style="width: 100px; height: auto; background-color: white; border-radius: 100%;">
+<img src="./public/assets/logo/jtisportcenter_large.png" alt="JTI Sport Center Logo" style="width: 200px; height: auto; background-color: white; border-radius: 100%;">
 
 ## Overview
 
@@ -129,11 +129,11 @@ yarn install
 
    - Peringatan:
 
-     Jika di local banyak data saat development, **Jangan Migrate Reset jika tidak ingin kehilangan data selain di Seeder**, karena sistemnya akan mereset semua data dan mengulangi kembali migrasi + seeder Prisma!
+     Jika di local banyak data saat development, **Jangan Migrate Reset jika tidak ingin kehilangan data**, karena sistemnya akan mereset semua data dan mengulangi kembali migrasi Prisma!
 
    - Saran:
 
-     Tambah atau ubah saja isi seeder supaya aman untuk `migrate reset`, tapi akan tetap hilang data jika memasukkan data didalam CRUD, jadi ingat!!
+     Tambah atau ubah saja isi seeder supaya aman untuk `migrate reset`, lalu run `npm run seed`
 
 3. Ingin Update Model dan Seeder PRISMA
 
