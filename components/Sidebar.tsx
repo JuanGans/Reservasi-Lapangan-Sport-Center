@@ -42,13 +42,23 @@ const Sidebar: React.FC<roleProps> = ({ role }) => {
 
         {/* TASK 2: KHUSUS ADMIN */}
         {role === "Admin" && (
-          <Link href="/inventaris">
-            <div className="flex items-center space-x-2 hover:text-[#0c3a66] transition-colors duration-200 px-4 py-2">
-              <i className="fas fa-file-alt text-base"></i>
-              <span>Facilites</span>
-            </div>
-          </Link>
-        )}
+  <>
+<Link href="/admin/reservations/list">
+      <div className="flex items-center space-x-2 hover:text-[#0c3a66] transition-colors duration-200 px-4 py-2">
+        <i className="fas fa-list text-base"></i>
+        <span>Reservations List</span>
+      </div>
+    </Link>
+
+    <Link href="/inventaris">
+      <div className="flex items-center space-x-2 hover:text-[#0c3a66] transition-colors duration-200 px-4 py-2">
+        <i className="fas fa-file-alt text-base"></i>
+        <span>Facilites</span>
+      </div>
+    </Link>
+  </>
+)}
+
 
         <Link href="/riwayat-pemesanaan">
           <div className="flex items-center space-x-2 hover:text-[#0c3a66] transition-colors duration-200 px-4 py-2">
