@@ -2,7 +2,7 @@
 
 ## Logo
 
-<img src="./public/assets/logo/jtisportcenter_large.png" alt="JTI Sport Center Logo" style="width: 50%; height: auto; background-color: white; border-radius: 100%;">
+<img src="./public/assets/logo/jtisportcenter_large.png" alt="JTI Sport Center Logo" style="width: 100px; height: auto; background-color: white; border-radius: 100%;">
 
 ## Overview
 
@@ -124,6 +124,7 @@ yarn install
 
    ```bash
    npx prisma migrate reset
+   npm run seed
    ```
 
    - Peringatan:
