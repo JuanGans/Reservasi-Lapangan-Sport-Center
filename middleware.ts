@@ -41,7 +41,7 @@ export async function middleware(req: NextRequest) {
       }
 
       // ⛔ Kalau sudah login dan ke public/auth page → redirect ke dashboard
-      if (isAuthPage || isPublicPage) {
+      if (isAuthPage) {
         url.pathname = userRole === "admin" ? "/admin" : "/member";
         url.searchParams.set("repeat", "1");
         return NextResponse.redirect(url);

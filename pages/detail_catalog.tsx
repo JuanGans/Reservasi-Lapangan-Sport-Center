@@ -44,6 +44,8 @@ export default function DetailCatalog() {
     "19:00 - 20:00",
     "20:00 - 21.00",
     "21.00 - 22.00",
+    "22.00 - 23.00",
+    "23.00 - 24.00",
   ];
 
   useEffect(() => {
@@ -309,7 +311,7 @@ export default function DetailCatalog() {
             </motion.div>
           )}
         </AnimatePresence>
-      </MainLayout>
+      </MainLayout> 
     </>
   );
 }

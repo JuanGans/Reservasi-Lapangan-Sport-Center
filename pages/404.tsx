@@ -18,7 +18,7 @@ export default function NotFound() {
 
       try {
         const res = await fetch("/api/auth/me");
-        if (!res.ok) throw new Error("Unauthorized");
+        if (!res.ok) throw new Error("Unau  thorized");
 
         const data = await res.json();
         userRole = data.role?.toLowerCase() || "guest";

@@ -1,0 +1,50 @@
+[
+  {
+    "id": 1,
+    "name": "Lapangan Futsal A",
+    "description": "Lapangan indoor berstandar nasional dengan lantai vinyl dan pencahayaan LED.",
+    "price": 150000,
+    "rating": 0,
+    "reviews": 0
+  },
+  {
+    "id": 2,
+    "name": "Lapangan Futsal B",
+    "description": "Cocok untuk latihan tim, tersedia ruang ganti dan tribun penonton.",
+    "price": 140000,
+    "rating": 0,
+    "reviews": 0
+  },
+  {
+    "id": 3,
+    "name": "Lapangan Futsal C",
+    "description": "Lapangan outdoor dan pencahayaan malam hari.",
+    "price": 130000,
+    "rating": 0,
+    "reviews": 0
+  },
+  {
+    "id": 4,
+    "name": "Lapangan Futsal D",
+    "description": "Tersedia 3 lapangan indoor ber-AC dengan lantai kayu.",
+    "price": 160000,
+    "rating": 0,
+    "reviews": 0
+  },
+  {
+    "id": 5,
+    "name": "Lapangan Futsal E",
+    "description": "Lapangan dengan permukaan sintetis dan tersedia pelatih profesional.",
+    "price": 155000,
+    "rating": 0,
+    "reviews": 0
+  },
+  {
+    "id": 6,
+    "name": "Lapangan Futsal F",
+    "description": "Tersedia untuk turnamen sekolah atau komunitas dengan fasilitas lengkap.",
+    "price": 170000,
+    "rating": 0,
+    "reviews": 0
+  }
+]
