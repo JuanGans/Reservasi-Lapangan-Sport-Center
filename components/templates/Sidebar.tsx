@@ -179,19 +179,28 @@ const getActiveMenu = () => {
         )}
       </div>
 
-      <nav className="flex flex-col space-y-4 text-gray-700 text-sm font-semibold">
-        {navItem(`/${role.toLowerCase()}`, "fas fa-th-large", "Dashboard")}
-        {navItem(`/${role.toLowerCase()}/catalog`, "fas fa-shopping-cart", "Katalog")}
-        {navItem(`/${role.toLowerCase()}/booking`, "fas fa-calendar-check", "Booking")}
+      {/* Navigation items */}
+<nav className="flex flex-col space-y-4 text-gray-700 text-sm font-semibold">
+  {role === "Member" && (
+    <>
+      <p className="text-xs font-bold text-gray-500 px-2">User Menu</p>
+      {navItem(`/${role.toLowerCase()}`, "fas fa-th-large", "Dashboard")}
+      {navItem(`/${role.toLowerCase()}/cataloguser`, "fas fa-shopping-cart", "Katalog")}
+      {navItem(`/${role.toLowerCase()}/booking`, "fas fa-calendar-check", "Booking")}
+    </>
+  )}
 
-        {/* Admin specific items */}
-        {role === "Admin" && (
-          <>
-            {navItem(`/${role.toLowerCase()}/users`, "fas fa-users", "Pengguna")}
-            {navItem(`/${role.toLowerCase()}/transaction`, "fas fa-file-alt", "Transaksi")}
-          </>
-        )}
-      </nav>
+  {role === "Admin" && (
+    <>
+      <p className="text-xs font-bold text-gray-500 px-2">Admin Menu</p>
+      {navItem("/admin", "fas fa-th-large", "Dashboard")}
+      {navItem("/admin/catalog", "fas fa-shopping-cart", "Katalog")}
+      {navItem("/admin/users", "fas fa-users", "Pengguna")}
+      {navItem("/admin/transaction", "fas fa-file-alt", "Transaksi")}
+    </>
+  )}
+</nav>
+
     </>
   );
 
