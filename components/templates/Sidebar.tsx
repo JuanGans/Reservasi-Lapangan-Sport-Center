@@ -92,7 +92,8 @@ const Sidebar: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   if (role === "Admin") {
     menuHrefs.push(
       `/${role.toLowerCase()}/users`,
-      `/${role.toLowerCase()}/transaction`
+      `/${role.toLowerCase()}/transaction`,
+      `/${role.toLowerCase()}/list`
     );
   }
 
@@ -185,8 +186,9 @@ const getActiveMenu = () => {
     <>
       <p className="text-xs font-bold text-gray-500 px-2">User Menu</p>
       {navItem(`/${role.toLowerCase()}`, "fas fa-th-large", "Dashboard")}
-      {navItem(`/${role.toLowerCase()}/cataloguser`, "fas fa-shopping-cart", "Katalog")}
+      {navItem(`/${role.toLowerCase()}/catalog`, "fas fa-shopping-cart", "Katalog")}
       {navItem(`/${role.toLowerCase()}/booking`, "fas fa-calendar-check", "Booking")}
+      {navItem("/member/transaction", "fas fa-file-alt", "Transaksi")}
     </>
   )}
 
@@ -195,6 +197,8 @@ const getActiveMenu = () => {
       <p className="text-xs font-bold text-gray-500 px-2">Admin Menu</p>
       {navItem("/admin", "fas fa-th-large", "Dashboard")}
       {navItem("/admin/catalog", "fas fa-shopping-cart", "Katalog")}
+      {navItem(`/${role.toLowerCase()}/booking`, "fas fa-calendar-check", "Booking")}
+      {navItem("/admin/list", "fas fa-list", "Reservations List")}
       {navItem("/admin/users", "fas fa-users", "Pengguna")}
       {navItem("/admin/transaction", "fas fa-file-alt", "Transaksi")}
     </>
