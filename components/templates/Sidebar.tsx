@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { usePathname } from "next/navigation";
 
 const SIDEBAR_EXPANDED_WIDTH = 256; // 16rem
 const SIDEBAR_COLLAPSED_WIDTH = 80; // 5rem
@@ -48,9 +49,7 @@ const Sidebar: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         const res = await fetch("/api/auth/me");
         if (!res.ok) throw new Error("Unauthorized");
         const data = await res.json();
-        const formattedRole = data.role
-          ? data.role.charAt(0).toUpperCase() + data.role.slice(1).toLowerCase()
-          : "";
+        const formattedRole = data.role ? data.role.charAt(0).toUpperCase() + data.role.slice(1).toLowerCase() : "";
         setRole(formattedRole);
       } catch (err) {
         console.error("Failed to fetch user role:", err);
@@ -82,58 +81,39 @@ const Sidebar: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   };
 
   // Daftar semua href menu sesuai role
-  const menuHrefs = [
-    `/${role.toLowerCase()}`,
-    `/${role.toLowerCase()}/catalog`,
-    `/${role.toLowerCase()}/add-facility`,
-    `/${role.toLowerCase()}/booking`,
-  ];
+  const menuHrefs = [`/${role.toLowerCase()}`, `/${role.toLowerCase()}/catalog`, `/${role.toLowerCase()}/add-facility`, `/${role.toLowerCase()}/booking`];
 
   if (role === "Admin") {
-    menuHrefs.push(
-      `/${role.toLowerCase()}/users`,
-      `/${role.toLowerCase()}/transaction`,
-      `/${role.toLowerCase()}/list`
-    );
+    menuHrefs.push(`/${role.toLowerCase()}/users`, `/${role.toLowerCase()}/transaction`, `/${role.toLowerCase()}/list`);
   }
 
   // Fungsi untuk dapatkan menu aktif paling spesifik
-const getActiveMenu = () => {
-  const path = router.pathname;
+  const getActiveMenu = () => {
+    const path = router.pathname;
 
-  // Jika user sedang di add-facility, kita aktifkan katalog
-  if (path === `/${role.toLowerCase()}/add-facility`) {
-    return `/${role.toLowerCase()}/catalog`;
-  }
+    // Jika user sedang di add-facility, kita aktifkan katalog
+    if (path === `/${role.toLowerCase()}/add-facility`) {
+      return `/${role.toLowerCase()}/catalog`;
+    }
 
-  const matched = menuHrefs.filter((href) => {
-    if (href === "/") return path === "/";
-    return path === href || path.startsWith(href + "/");
-  });
+    const matched = menuHrefs.filter((href) => {
+      if (href === "/") return path === "/";
+      return path === href || path.startsWith(href + "/");
+    });
 
-  if (matched.length === 0) return null;
+    if (matched.length === 0) return null;
 
-  return matched.reduce((a, b) => (a.length > b.length ? a : b));
-};
-
+    return matched.reduce((a, b) => (a.length > b.length ? a : b));
+  };
 
   const activeMenu = getActiveMenu();
 
   // Fungsi buat navItem dengan status active sesuai activeMenu
-  const navItem = (
-    href: string,
-    iconClass: string,
-    label: string
-  ) => {
+  const navItem = (href: string, iconClass: string, label: string) => {
     const active = href === activeMenu;
     return (
       <Link href={href} key={label}>
-        <motion.div
-          whileHover={{ scale: 1.05 }}
-          className={`flex items-center space-x-2 ${
-            active ? "bg-[#0c3a66] text-white" : "hover:text-[#0c3a66]"
-          } rounded-md transition-colors duration-200 px-4 py-2 cursor-pointer select-none`}
-        >
+        <motion.div whileHover={{ scale: 1.05 }} className={`flex items-center space-x-2 ${active ? "bg-[#0c3a66] text-white" : "hover:text-[#0c3a66]"} rounded-md transition-colors duration-200 px-4 py-2 cursor-pointer select-none`}>
           <i className={`${iconClass} text-sm`}></i>
           <motion.span
             initial={false}
@@ -155,11 +135,7 @@ const getActiveMenu = () => {
   const SidebarContent = () => (
     <>
       {!isMobileView && (
-        <button
-          onClick={handleToggleCollapse}
-          className="mb-4 pr-3 self-end text-gray-600 hover:text-gray-900 cursor-pointer hidden lg:block"
-          aria-label="Toggle Sidebar"
-        >
+        <button onClick={handleToggleCollapse} className="mb-4 pr-3 self-end text-gray-600 hover:text-gray-900 cursor-pointer hidden lg:block" aria-label="Toggle Sidebar">
           {isCollapsed ? <Menu size={24} /> : <X size={24} />}
         </button>
       )}
@@ -167,44 +143,41 @@ const getActiveMenu = () => {
       <div className="flex items-center space-x-3 mb-6 px-2 overflow-hidden">
         <img alt="Polinema" className="w-8 h-8 flex-shrink-0" src="/assets/logo/jsc.png" />
 
-        {!isCollapsed && (
+        {(!isCollapsed || isMobileView) && (
           <div className="origin-left">
             <p className="text-xs font-bold text-gray-900 leading-none mb-1 whitespace-nowrap">
               JTI Sport Center
-              <span className="text-xs text-green-600 font-bold ml-2">{role}</span>
+              {role ? <span className="text-xs text-green-600 font-bold ml-2">{role}</span> : <span className="ml-2 h-3 w-12 bg-green-100 animate-pulse rounded" />}
             </p>
-            <p className="text-[9px] font-normal text-gray-600 leading-none whitespace-nowrap">
-              Politeknik Negeri Malang
-            </p>
+            <p className="text-[9px] font-normal text-gray-600 leading-none whitespace-nowrap">Politeknik Negeri Malang</p>
           </div>
         )}
       </div>
 
       {/* Navigation items */}
-<nav className="flex flex-col space-y-4 text-gray-700 text-sm font-semibold">
-  {role === "Member" && (
-    <>
-      <p className="text-xs font-bold text-gray-500 px-2">User Menu</p>
-      {navItem(`/${role.toLowerCase()}`, "fas fa-th-large", "Dashboard")}
-      {navItem(`/${role.toLowerCase()}/catalog`, "fas fa-shopping-cart", "Katalog")}
-      {navItem(`/${role.toLowerCase()}/booking`, "fas fa-calendar-check", "Booking")}
-      {navItem("/member/transaction", "fas fa-file-alt", "Transaksi")}
-    </>
-  )}
+      <nav className="flex flex-col space-y-4 text-gray-700 text-sm font-semibold">
+        {role === "Member" && (
+          <>
+            <p className="text-xs font-bold text-gray-500 px-2">User Menu</p>
+            {navItem(`/${role.toLowerCase()}`, "fas fa-th-large", "Dashboard")}
+            {navItem(`/${role.toLowerCase()}/catalog`, "fas fa-shopping-cart", "Katalog")}
+            {navItem(`/${role.toLowerCase()}/booking`, "fas fa-calendar-check", "Booking")}
+            {navItem("/member/transaction", "fas fa-file-alt", "Transaksi")}
+          </>
+        )}
 
-  {role === "Admin" && (
-    <>
-      <p className="text-xs font-bold text-gray-500 px-2">Admin Menu</p>
-      {navItem("/admin", "fas fa-th-large", "Dashboard")}
-      {navItem("/admin/catalog", "fas fa-shopping-cart", "Katalog")}
-      {navItem(`/${role.toLowerCase()}/booking`, "fas fa-calendar-check", "Booking")}
-      {navItem("/admin/list", "fas fa-list", "Reservations List")}
-      {navItem("/admin/users", "fas fa-users", "Pengguna")}
-      {navItem("/admin/transaction", "fas fa-file-alt", "Transaksi")}
-    </>
-  )}
-</nav>
-
+        {role === "Admin" && (
+          <>
+            <p className="text-xs font-bold text-gray-500 px-2">Admin Menu</p>
+            {navItem("/admin", "fas fa-th-large", "Dashboard")}
+            {navItem("/admin/catalog", "fas fa-shopping-cart", "Katalog")}
+            {navItem(`/${role.toLowerCase()}/booking`, "fas fa-calendar-check", "Booking")}
+            {navItem("/admin/list", "fas fa-list", "Reservations List")}
+            {navItem("/admin/users", "fas fa-users", "Pengguna")}
+            {navItem("/admin/transaction", "fas fa-file-alt", "Transaksi")}
+          </>
+        )}
+      </nav>
     </>
   );
 
@@ -213,11 +186,7 @@ const getActiveMenu = () => {
   return (
     <>
       {/* Mobile hamburger */}
-      <button
-        onClick={() => setIsMobileSidebarOpen(true)}
-        className="lg:hidden fixed top-8 left-4 z-[100] bg-white p-2 rounded shadow cursor-pointer"
-        aria-label="Open Sidebar"
-      >
+      <button onClick={() => setIsMobileSidebarOpen(true)} className="lg:hidden fixed top-5 left-4 z-[20] bg-white p-2 rounded shadow cursor-pointer" aria-label="Open Sidebar">
         <Menu size={24} />
       </button>
 
@@ -235,14 +204,7 @@ const getActiveMenu = () => {
       <AnimatePresence>
         {isMobileSidebarOpen && (
           <>
-            <motion.div
-              className="fixed inset-0 bg-black/70 z-[90]"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsMobileSidebarOpen(false)}
-              aria-hidden="true"
-            />
+            <motion.div className="fixed inset-0 bg-black/70 z-[90]" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsMobileSidebarOpen(false)} aria-hidden="true" />
             <motion.aside
               initial={{ x: "-100%" }}
               animate={{ x: 0 }}
@@ -250,11 +212,7 @@ const getActiveMenu = () => {
               transition={{ type: "tween" }}
               className="fixed top-0 left-0 w-64 h-full bg-white border-r border-gray-200 flex flex-col px-4 py-6 z-[100] overflow-y-auto"
             >
-              <button
-                onClick={() => setIsMobileSidebarOpen(false)}
-                className="mb-4 self-end text-gray-600 hover:text-gray-900 cursor-pointer text-xl"
-                aria-label="Close Sidebar"
-              >
+              <button onClick={() => setIsMobileSidebarOpen(false)} className="mb-4 self-end text-gray-600 hover:text-gray-900 cursor-pointer text-xl" aria-label="Close Sidebar">
                 ✕
               </button>
               <SidebarContent />
@@ -265,6 +223,7 @@ const getActiveMenu = () => {
 
       {/* Content wrapper yang geser sesuai sidebar */}
       <main
+        className="bg-gray-50 flex-1 px-6 pb-6 mt-15"
         style={{
           marginLeft: isMobileView ? 0 : isCollapsed ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_EXPANDED_WIDTH,
           transition: "margin-left 0.3s ease",

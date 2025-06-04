@@ -67,7 +67,7 @@ const MemberPage: React.FC = () => {
         </div>
 
         {/* Tabel Booking */}
-        <BookingTable bookings={bookings} filterStatus={filterStatus} />
+        <BookingTable bookings={bookings} filterStatus={filterStatus} setFilterStatus={setFilterStatus} />
       </DashboardLayout>
     </>
   );

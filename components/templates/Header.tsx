@@ -59,7 +59,7 @@ const Header: React.FC = () => {
 
   return (
     // HEADER
-    <header className="w-full flex justify-end items-center space-x-6 px-6 py-3">
+    <header className="w-full flex justify-end items-center space-x-6 px-6 py-3 fixed h-20 bg-white z-[2]">
       {/* SEARCH */}
       <button aria-label="Search" className="text-gray-500 hover:text-gray-700 transition-colors duration-200 cursor-pointer">
         <i className="fas fa-shopping-cart"></i>
@@ -73,11 +73,13 @@ const Header: React.FC = () => {
       {/* DROPDOWN PROFILE AND LOGOUT */}
       <div className="relative" ref={dropdownRef}>
         <button className="flex items-center space-x-2 focus:outline-none cursor-pointer" onClick={() => setIsDropdownOpen(!isDropdownOpen)} aria-expanded={isDropdownOpen} aria-haspopup="true">
-          <img alt="User" className="w-8 h-8 rounded-full object-cover" src={`/assets/user/${user?.user_img}`} />
+          {user?.user_img ? <img alt="User" className="w-8 h-8 rounded-full object-cover" src={`/assets/user/${user.user_img}`} /> : <div className="w-8 h-8 rounded-full bg-gray-300 animate-pulse" />}
+
           <div className="text-right">
-            <p className="text-xs font-semibold text-gray-900 leading-tight">{user?.username || "..."}</p>
-            <p className="text-[9px] text-gray-500 leading-tight">{user?.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : "..."}</p>
+            {user?.username ? <p className="text-xs font-semibold text-gray-900 leading-tight">{user.username}</p> : <div className="h-3 w-20 bg-gray-200 rounded animate-pulse mb-1" />}
+            {user?.role ? <p className="text-[9px] text-gray-500 leading-tight">{user.role.charAt(0).toUpperCase() + user.role.slice(1)}</p> : <div className="h-2 w-14 bg-gray-100 rounded animate-pulse" />}
           </div>
+
           <svg className={`ml-1 h-4 w-4 text-gray-500 transition-transform duration-200 ${isDropdownOpen ? "transform rotate-180" : ""}`} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
             <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
           </svg>

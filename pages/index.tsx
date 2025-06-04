@@ -7,16 +7,7 @@ import LandingAnimation from "@/components/animation/LandingAnimation";
 import { motion, AnimatePresence } from "framer-motion";
 import FAQAnimation from "@/components/animation/FAQAnimation";
 import ReviewCarousel from "@/components/animation/ReviewCarousel";
-
-type Facility = {
-  id: number;
-  field_name: string;
-  field_desc: string;
-  field_image?: string;
-  price_per_session: string;
-  avg_rating?: number;
-  total_review?: number;
-};
+import { Facility } from "@/types/facility";
 
 export default function Home() {
   const [selectedField, setSelectedField] = useState<Facility | null>(null);
@@ -84,22 +75,14 @@ export default function Home() {
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
       <MainLayout title="Beranda">
         {/* HERO */}
-        <section
-          id="home"
-          className="relative min-h-screen flex flex-col items-center justify-center bg-cover bg-center text-center px-4 sm:px-6 md:px-12 lg:px-24"
-          style={{ backgroundImage: "url('/assets/bg/futsal.jpg')" }}
-        >
+        <section id="home" className="relative min-h-screen flex flex-col items-center justify-center bg-cover bg-center text-center px-4 sm:px-6 md:px-12 lg:px-24" style={{ backgroundImage: "url('/assets/bg/futsal.jpg')" }}>
           <div className="absolute inset-0 bg-black/60" />
           <div className="relative z-10 mt-24 px-4">
             <LandingAnimation>
-              <h1 className="text-white text-3xl sm:text-4xl md:text-6xl font-bold mb-4 drop-shadow-lg">
-                Selamat Datang di Website Sport Center JTI POLINEMA!
-              </h1>
+              <h1 className="text-white text-3xl sm:text-4xl md:text-6xl font-bold mb-4 drop-shadow-lg">Selamat Datang di Website Sport Center JTI POLINEMA!</h1>
             </LandingAnimation>
             <LandingAnimation delay={0.1}>
-              <p className="text-white max-w-2xl mx-auto text-base sm:text-lg md:text-xl drop-shadow-md">
-                Tempat booking lapangan, jadwal latihan, dan informasi seputar sport center JTI Polinema dengan mudah dan cepat.
-              </p>
+              <p className="text-white max-w-2xl mx-auto text-base sm:text-lg md:text-xl drop-shadow-md">Tempat booking lapangan, jadwal latihan, dan informasi seputar sport center JTI Polinema dengan mudah dan cepat.</p>
             </LandingAnimation>
           </div>
         </section>
@@ -110,9 +93,7 @@ export default function Home() {
             <div className="text-center text-blue-900 text-2xl font-semibold">Tentang</div>
           </LandingAnimation>
           <LandingAnimation delay={0.1}>
-            <p className="text-blue-900 max-w-xl mx-auto drop-shadow-md text-center mt-2 text-base">
-              Platform digital untuk melakukan pemesanan lapangan dan melihat jadwal kegiatan olahraga di lingkungan JTI Polinema.
-            </p>
+            <p className="text-blue-900 max-w-xl mx-auto drop-shadow-md text-center mt-2 text-base">Platform digital untuk melakukan pemesanan lapangan dan melihat jadwal kegiatan olahraga di lingkungan JTI Polinema.</p>
           </LandingAnimation>
         </section>
 
@@ -137,15 +118,8 @@ export default function Home() {
             {Array.isArray(facilities) &&
               facilities.map((field) => (
                 <LandingAnimation key={field.id} delay={field.id * 0.1}>
-                  <div
-                    className="bg-white shadow-md rounded-lg p-4 hover:scale-105 transition cursor-pointer"
-                    onClick={() => setSelectedField(field)}
-                  >
-                    <img
-                      src={field.field_image || "/fallback.jpg"}
-                      alt={field.field_name}
-                      className="rounded-md mb-3 w-full h-48 object-cover"
-                    />
+                  <div className="bg-white shadow-md rounded-lg p-4 hover:scale-105 transition cursor-pointer" onClick={() => setSelectedField(field)}>
+                    <img src={field.field_image ? `/assets/field/${field.field_image}` : "/fallback.jpg"} alt={field.field_name} className="rounded-md mb-3 w-full h-48 object-cover" />
                     <h3 className="text-blue-900 font-bold mb-2">{field.field_name}</h3>
                     <p className="text-gray-600 text-sm">{field.field_desc}</p>
                   </div>
@@ -165,12 +139,7 @@ export default function Home() {
         {/* MODAL */}
         <AnimatePresence>
           {selectedField && (
-            <motion.div
-              className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-black/70"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-            >
+            <motion.div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-black/70" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
               <motion.div
                 className="bg-white p-6 sm:p-8 rounded-lg w-[90%] max-w-md text-center relative"
                 initial={{ opacity: 0, scale: 0.95 }}
@@ -178,23 +147,14 @@ export default function Home() {
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.3 }}
               >
-                <button
-                  className="absolute top-2 right-3 text-gray-600 hover:text-black text-xl cursor-pointer"
-                  onClick={() => setSelectedField(null)}
-                >
+                <button className="absolute top-2 right-3 text-gray-600 hover:text-black text-xl cursor-pointer" onClick={() => setSelectedField(null)}>
                   X
                 </button>
-                <img
-                  src={selectedField.field_image || "/fallback.jpg"}
-                  alt={selectedField.field_name}
-                  className="rounded-md mb-4 w-full h-48 object-cover"
-                />
+                <img src={selectedField.field_image ? `/assets/field/${selectedField.field_image}` : "/fallback.jpg"} alt={selectedField.field_name} className="rounded-md mb-4 w-full h-48 object-cover" />
                 <h3 className="text-blue-900 font-bold text-xl mb-2">{selectedField.field_name}</h3>
                 <p className="text-gray-700 mb-2">{selectedField.field_desc}</p>
-                <p className="text-sm text-gray-500 mb-4">
-                  Harga: Rp. {parseInt(selectedField.price_per_session).toLocaleString()}
-                </p>
-                <Link href={`/detail_catalog?id=${selectedField.id}`} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                <p className="text-sm text-gray-500 mb-4">Harga: Rp. {parseInt(selectedField.price_per_session).toLocaleString()}</p>
+                <Link href={`/detail_catalog/${selectedField.id}`} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
                   Lihat Lapangan
                 </Link>
               </motion.div>
@@ -211,15 +171,10 @@ export default function Home() {
             <h2 className="text-3xl font-bold text-blue-900 mb-4">Latihan Jadi Lebih Mudah</h2>
           </LandingAnimation>
           <LandingAnimation delay={0.1}>
-            <p className="text-gray-600 mb-6 max-w-xl mx-auto text-base">
-              Dengan proses pendaftaran yang simpel dan sistem booking lokal, reservasi jadwalmu makin praktis.
-            </p>
+            <p className="text-gray-600 mb-6 max-w-xl mx-auto text-base">Dengan proses pendaftaran yang simpel dan sistem booking lokal, reservasi jadwalmu makin praktis.</p>
           </LandingAnimation>
           <LandingAnimation delay={0.2}>
-            <Link
-              href="/login"
-              className="inline-block bg-blue-900 text-white px-4 sm:px-6 py-2 sm:py-3 rounded hover:bg-blue-700 text-sm sm:text-base"
-            >
+            <Link href="/login" className="inline-block bg-blue-900 text-white px-4 sm:px-6 py-2 sm:py-3 rounded hover:bg-blue-700 text-sm sm:text-base transition-all duration-300">
               Pesan Sekarang
             </Link>
           </LandingAnimation>

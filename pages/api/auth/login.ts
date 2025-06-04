@@ -28,7 +28,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // JIKA USER TIDAK TERDAFTAR, TIDAK DIIZINKAN MASUK
     if (!Array.isArray(rows) || rows.length === 0) {
-      return res.status(401).json({ message: "User tidak ditemukan" });
+      return res.status(401).json({ message: "User tidak ditemukan!" });
     }
 
     // DATA USER
@@ -73,7 +73,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     );
 
     // STATUS LOGIN BERHASIL
-    res.status(200).json({ message: "Login successful" });
+    res.status(200).json({ message: "Login Sukses!" });
 
     // MENANGKAP ERROR
   } catch (error) {

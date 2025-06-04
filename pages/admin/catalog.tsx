@@ -1,268 +1,229 @@
 // /pages/admin/catalog.tsx
-import { useRouter } from "next/router";
-import React, { useState, useEffect } from "react";
+// import { useRouter } from "next/router";
+import React, { useState, useEffect, useMemo } from "react";
 import DashboardLayout from "@/layout/DashboardLayout";
 import Toast from "@/components/toast/Toast";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { CardContent } from "@/components/ui/CardContent";
+import { AnimatePresence, motion } from "framer-motion";
+import { Facility } from "@/types/facility";
+import AdminFacilityCard from "@/components/catalog/AdminFacilityCard";
+import FacilityForm from "@/components/catalog/FacilityForm";
+import DeleteConfirmationModal from "@/components/catalog/DeleteConfirmationModal";
+import SearchAndSort from "@/components/catalog/SearchAndSort";
+import Pagination from "@/components/catalog/Pagination";
 
-interface Facility {
-  id: number;
-  field_name: string;
-  field_desc: string;
-  field_image?: string | null;
-  price_per_session: number;
-  avg_rating: number;
-  total_review: number;
-}
+// Komponen utama halaman katalog
+const CatalogAdminPage: React.FC = () => {
+  // const router = useRouter();
 
-const CatalogPage: React.FC = () => {
-  const router = useRouter();
+  // State utama
   const [facilities, setFacilities] = useState<Facility[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
   const [editingFacility, setEditingFacility] = useState<Facility | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [deletingFacility, setDeletingFacility] = useState<Facility | null>(null);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 
-  // Tangani toast dari query URL (misal setelah redirect add facility)
+  const PAGE_SIZE = 6;
+
+  // Nonaktifkan scroll saat modal terbuka
   useEffect(() => {
-    if (router.query.toastMessage) {
-      setToast({
-        message: router.query.toastMessage as string,
-        type: (router.query.toastType as "success" | "error" | "info") || "info",
-      });
+    const overflow = editingFacility || showAddModal || deletingFacility ? "hidden" : "auto";
+    document.body.style.overflow = overflow;
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [editingFacility, showAddModal, deletingFacility]);
 
-      // Hapus query toastMessage dan toastType agar toast tidak muncul terus
-      const { toastMessage, toastType, ...rest } = router.query;
-      router.replace({ pathname: router.pathname, query: rest }, undefined, { shallow: true });
-    }
-  }, [router.query, router]);
-
+  // Ambil data fasilitas dari API
   useEffect(() => {
-    async function fetchFacilities() {
+    const fetchFacilities = async () => {
       try {
         const res = await fetch("/api/facilities/getAllFacilities");
-        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        if (!res.ok) throw new Error("Gagal mengambil data fasilitas");
         const data = await res.json();
-        if (Array.isArray(data)) {
-          setFacilities(data);
-        } else {
-          setError("Data fasilitas tidak valid");
-        }
-      } catch (err: any) {
-        setError(err.message || "Gagal mengambil data fasilitas");
-      } finally {
-        setLoading(false);
+        setFacilities(data);
+      } catch (error) {
+        console.error(error);
+        setToast({ message: "Gagal memuat data", type: "error" });
       }
-    }
+    };
     fetchFacilities();
   }, []);
 
-  const handleDelete = async (id: number) => {
-    const confirmDelete = window.confirm("Apakah Anda yakin ingin menghapus fasilitas ini?");
-    if (!confirmDelete) return;
+  const handleEditFacility = (facility: Facility) => {
+    setEditingFacility(facility);
+  };
 
-    try {
-      const res = await fetch(`/api/facilities/deleteFacility`, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id }),
-      });
-
-      if (!res.ok) throw new Error("Gagal menghapus fasilitas");
-
-      setFacilities((prev) => prev.filter((f) => f.id !== id));
-      setToast({ message: "Fasilitas berhasil dihapus", type: "success" });
-    } catch (error: any) {
-      setToast({ message: error.message || "Gagal menghapus fasilitas", type: "error" });
+  const handleDeleteFacility = (id: number) => {
+    const facility = facilities.find((f) => f.id === id);
+    if (facility) {
+      setDeletingFacility(facility);
     }
   };
 
-  const handleEdit = (facility: Facility) => {
-    setEditingFacility({ ...facility });
-    setImagePreview(null);
-    setSelectedFile(null);
-  };
-
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      setSelectedFile(file);
-
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-      setEditingFacility((prev) => prev ? { ...prev, field_image: null } : null);
-    }
-  };
-
-  const handleSaveEdit = async () => {
+  const handleSaveEdit = async (formData: FormData) => {
     if (!editingFacility) return;
 
     try {
-      const formData = new FormData();
       formData.append("id", editingFacility.id.toString());
-      formData.append("field_name", editingFacility.field_name);
-      formData.append("field_desc", editingFacility.field_desc);
-      formData.append("price_per_session", editingFacility.price_per_session.toString());
 
-      if (selectedFile) {
-        formData.append("field_image", selectedFile);
-      }
-
-      const res = await fetch("/api/facilities/updateFacility", {
-        method: "POST",
-        body: formData,
-      });
-
+      // console.log(formData);
+      const res = await fetch("/api/facilities/updateFacility", { method: "POST", body: formData });
       const data = await res.json();
-
       if (!res.ok) throw new Error(data.message || "Gagal menyimpan perubahan");
 
       setFacilities((prev) => prev.map((f) => (f.id === data.id ? data : f)));
-
       setToast({ message: `Berhasil menyimpan perubahan untuk ${data.field_name}`, type: "success" });
       setEditingFacility(null);
-      setImagePreview(null);
-      setSelectedFile(null);
     } catch (error: any) {
       setToast({ message: error.message || "Gagal menyimpan perubahan", type: "error" });
     }
   };
 
+  const handleAddFacility = async (formData: FormData) => {
+    try {
+      const res = await fetch("/api/facilities/addFacility", { method: "POST", body: formData });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Gagal menambahkan fasilitas");
+
+      setFacilities((prev) => [...prev, data]);
+      setToast({ message: "Fasilitas berhasil ditambahkan", type: "success" });
+      setShowAddModal(false);
+    } catch (error: any) {
+      setToast({ message: error.message || "Gagal menambahkan fasilitas", type: "error" });
+    }
+  };
+
+  const confirmDeleteFacility = async () => {
+    if (!deletingFacility) return;
+    try {
+      const res = await fetch(`/api/facilities/deleteFacility`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: deletingFacility.id }),
+      });
+
+      if (!res.ok) throw new Error("Gagal menghapus fasilitas");
+      setFacilities((prev) => prev.filter((f) => f.id !== deletingFacility.id));
+      setToast({ message: "Fasilitas berhasil dihapus", type: "success" });
+    } catch (error: any) {
+      setToast({ message: error.message || "Gagal menghapus fasilitas", type: "error" });
+    } finally {
+      setDeletingFacility(null);
+    }
+  };
+
+  // Data hasil pencarian dan sortir
+  const filteredFacilities = useMemo(() => {
+    let filtered = [...facilities];
+    if (searchTerm.trim()) {
+      filtered = filtered.filter((f) => f.field_name.toLowerCase().includes(searchTerm.toLowerCase()));
+    }
+    filtered.sort((a, b) => {
+      const priceA = Number(a.price_per_session);
+      const priceB = Number(b.price_per_session);
+      return sortOrder === "asc" ? priceA - priceB : priceB - priceA;
+    });
+    return filtered;
+  }, [facilities, searchTerm, sortOrder]);
+
+  // Paginasi
+  const totalPages = Math.ceil(filteredFacilities.length / PAGE_SIZE);
+  const paginatedFacilities = filteredFacilities.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value);
+    setCurrentPage(1);
+  };
+
+  const handleSortChange = (value: "asc" | "desc") => {
+    setSortOrder(value);
+    setCurrentPage(1);
+  };
+
   return (
-    <>
+    <div>
+      {/* Toast */}
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
-      <DashboardLayout title="Catalog">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-blue-900 font-semibold text-xl">Daftar Fasilitas</h2>
-          <button
-            onClick={() => router.push("/admin/add-facility")}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg shadow"
-          >
-            + Tambah Fasilitas
+
+      {/* Layout dan header */}
+      <DashboardLayout title="Katalog Admin">
+        <div className="flex justify-between items-center mb-4 mt-2">
+          <h2 className="text-blue-900 font-semibold text-xl">Daftar Katalog Lapangan</h2>
+          <button onClick={() => setShowAddModal(true)} className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 text-sm py-2 rounded-lg shadow cursor-pointer">
+            + Tambah Katalog
           </button>
         </div>
 
-        {loading && <p>Loading fasilitas...</p>}
-        {error && <p className="text-red-600">Gagal mengambil data fasilitas: {error}</p>}
-        {!loading && !error && facilities.length === 0 && <p>Data fasilitas kosong.</p>}
+        <SearchAndSort searchTerm={searchTerm} onSearchChange={handleSearchChange} sortOrder={sortOrder} onSortChange={handleSortChange} />
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          {facilities.map((facility) => (
-            <Card key={facility.id} className="shadow-md rounded-lg overflow-hidden">
-              {facility.field_image ? (
-                <img
-                  src={`${facility.field_image}?t=${Date.now()}`}
-                  alt={facility.field_name}
-                  className="w-full h-40 object-cover"
-                />
-              ) : (
-                <div className="w-full h-40 bg-gray-200 flex items-center justify-center text-gray-500">
-                  No Image
-                </div>
-              )}
-              <CardContent>
-                <h3 className="font-semibold text-lg mb-1">{facility.field_name}</h3>
-                <p className="text-gray-700 text-sm mb-2">{facility.field_desc}</p>
-                <p className="font-semibold mb-1">
-                  Harga: Rp {facility.price_per_session.toLocaleString("id-ID", { minimumFractionDigits: 2 })}
-                </p>
-                <div className="flex gap-2 mt-3">
-                  <Button onClick={() => handleEdit(facility)} className="w-1/2 bg-blue-600 hover:bg-blue-700">
-                    Edit
-                  </Button>
-                  <Button onClick={() => handleDelete(facility.id)} className="w-1/2 bg-red-600 hover:bg-red-700">
-                    Hapus
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {editingFacility && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md space-y-4 overflow-auto max-h-[90vh]">
-              <h2 className="text-lg font-semibold text-black">Edit Fasilitas</h2>
-              <div>
-                <label className="text-sm font-medium text-black">Nama Lapangan</label>
-                <input
-                  type="text"
-                  className="w-full mt-1 border p-2 rounded bg-white text-black"
-                  value={editingFacility.field_name}
-                  onChange={(e) => setEditingFacility({ ...editingFacility, field_name: e.target.value })}
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-black">Deskripsi</label>
-                <textarea
-                  className="w-full mt-1 border p-2 rounded bg-white text-black"
-                  value={editingFacility.field_desc}
-                  onChange={(e) => setEditingFacility({ ...editingFacility, field_desc: e.target.value })}
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-black">Harga per Sesi</label>
-                <input
-                  type="number"
-                  className="w-full mt-1 border p-2 rounded bg-white text-black"
-                  value={editingFacility.price_per_session}
-                  onChange={(e) =>
-                    setEditingFacility({
-                      ...editingFacility,
-                      price_per_session: parseFloat(e.target.value),
-                    })
-                  }
-                />
-              </div>
-
-              <div>
-                <label className="text-sm font-medium text-black mb-1 block">Ganti Gambar Lapangan</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  id="fileUpload"
-                  onChange={handleImageChange}
-                  className="hidden"
-                />
-                <label
-                  htmlFor="fileUpload"
-                  className="inline-block cursor-pointer bg-blue-600 text-white px-3 py-2 rounded hover:bg-blue-700"
-                >
-                  Pilih Gambar
-                </label>
-                {imagePreview && (
-                  <img src={imagePreview} alt="Preview" className="mt-2 w-full h-40 object-cover rounded" />
-                )}
-                {!imagePreview && editingFacility.field_image && (
-                  <img
-                    src={editingFacility.field_image}
-                    alt={editingFacility.field_name}
-                    className="mt-2 w-full h-40 object-cover rounded"
-                  />
-                )}
-              </div>
-
-              <div className="flex justify-end gap-3 mt-4">
-                <Button onClick={() => setEditingFacility(null)} className="bg-gray-500 hover:bg-gray-600">
-                  Batal
-                </Button>
-                <Button onClick={handleSaveEdit} className="bg-green-600 hover:bg-green-700">
-                  Simpan
-                </Button>
-              </div>
-            </div>
+        {/* Card Grid */}
+        {paginatedFacilities.length === 0 ? (
+          <div className="flex flex-col items-center justify-center mt-16 text-gray-500">
+            <i className="fas fa-search fa-4x mb-4"></i> {/* FontAwesome v5 icon */}
+            <p className="text-lg">Tidak ada lapangan ditemukan.</p>
+          </div>
+        ) : (
+          <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 ${totalPages > 1 ? "" : "pb-8"}`}>
+            {paginatedFacilities.map((field) => (
+              <AdminFacilityCard key={field.id} facility={field} onEdit={handleEditFacility} onDelete={handleDeleteFacility} />
+            ))}
           </div>
         )}
+
+        <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+
+        {/* MODAL EDIT FACILITY */}
+        <AnimatePresence>
+          {editingFacility && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center px-4">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.25 }}
+                className="relative w-full max-w-4xl bg-white rounded-2xl shadow-xl p-6 overflow-auto max-h-[90vh]"
+              >
+                <button onClick={() => setEditingFacility(null)} className="absolute top-3 right-3 text-white bg-red-600 hover:bg-red-700 w-8 h-8 rounded-full flex items-center justify-center shadow-md cursor-pointer">
+                  <i className="fas fa-times text-sm" />
+                </button>
+
+                <h2 className="text-2xl font-semibold text-gray-800 mb-4">Edit Fasilitas</h2>
+                <FacilityForm initialData={editingFacility} onSubmit={handleSaveEdit} onCancel={() => setEditingFacility(null)} submitLabel="Simpan" />
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* MODAL ADD FACILITY */}
+        <AnimatePresence>
+          {showAddModal && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center px-4">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.25 }}
+                className="relative w-full max-w-4xl bg-white rounded-2xl shadow-xl p-6 overflow-auto max-h-[90vh]"
+              >
+                <button onClick={() => setShowAddModal(false)} className="absolute top-3 right-3 text-white bg-red-600 hover:bg-red-700 w-8 h-8 rounded-full flex items-center justify-center shadow-md cursor-pointer">
+                  <i className="fas fa-times text-sm" />
+                </button>
+
+                <h2 className="text-2xl font-semibold text-gray-800 mb-4">Tambah Fasilitas Baru</h2>
+                <FacilityForm onSubmit={handleAddFacility} onCancel={() => setShowAddModal(false)} submitLabel="Tambah" />
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* MODAL HAPUS */}
+        <DeleteConfirmationModal facility={deletingFacility} onClose={() => setDeletingFacility(null)} onConfirm={confirmDeleteFacility} />
       </DashboardLayout>
-    </>
+    </div>
   );
 };
 
-export default CatalogPage;
+export default CatalogAdminPage;

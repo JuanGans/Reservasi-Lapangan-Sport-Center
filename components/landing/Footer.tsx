@@ -20,12 +20,12 @@ const Footer: React.FC = () => {
   const socialLinks = [
     {
       icon: <Instagram size={18} />,
-      href: "https://instagram.com/jtisportcenter",
+      href: "#",
       label: "Instagram",
     },
     {
       icon: <Github size={18} />,
-      href: "https://youtube.com/@jtisportcenter",
+      href: "https://github.com/JuanGans/Reservasi-Lapangan-Sport-Center",
       label: "GitHub",
     },
     {

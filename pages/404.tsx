@@ -18,7 +18,7 @@ export default function NotFound() {
 
       try {
         const res = await fetch("/api/auth/me");
-        if (!res.ok) throw new Error("Unau  thorized");
+        if (!res.ok) throw new Error("Unauthorized");
 
         const data = await res.json();
         userRole = data.role?.toLowerCase() || "guest";
@@ -59,7 +59,7 @@ export default function NotFound() {
           <p className="text-sm text-gray-500 mb-4">
             Mengalihkan ke <strong>{role === "admin" || role === "member" ? `dashboard ${role}` : "beranda"}</strong> dalam 5 detik...
           </p>
-          <button onClick={() => router.push(role === "admin" || role === "member" ? `/${role}` : `/`)} className="bg-blue-700 text-white px-5 py-2 rounded hover:bg-blue-800 transition">
+          <button onClick={() => router.push(role === "admin" || role === "member" ? `/${role}` : `/`)} className="bg-blue-700 text-white px-5 py-2 rounded hover:bg-blue-800 transition cursor-pointer">
             Kembali Sekarang
           </button>
         </>

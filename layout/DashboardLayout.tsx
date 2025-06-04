@@ -16,11 +16,13 @@ const DashboardLayout = ({ title, children }: DashboardLayoutProps) => {
       <Head>
         <title>{title}</title>
       </Head>
+
       <div className="bg-[#f0f2f5] flex flex-col">
         {/* SIDEBAR */}
+        <Header />
         <Sidebar>
           {/* HEADER */}
-          <Header />
+
           {children}
         </Sidebar>
       </div>

@@ -25,10 +25,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     const imagePath = rows[0].field_image;
-    
-    // 2. Hapus file gambar dari /public/uploads
+
+    // 2. Hapus file gambar dari /public/assets/field
     if (imagePath) {
-      const absolutePath = path.join(process.cwd(), "public", imagePath);
+      const absolutePath = path.join(process.cwd(), "public/assets/field", imagePath);
       if (fs.existsSync(absolutePath)) {
         fs.unlinkSync(absolutePath);
       }
