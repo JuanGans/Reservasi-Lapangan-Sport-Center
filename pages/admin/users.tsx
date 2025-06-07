@@ -1,7 +1,8 @@
-import React, { useState, useEffect, ChangeEvent } from "react";
+import React, { useState, useEffect } from "react";
 import DashboardLayout from "@/layout/DashboardLayout";
 import Toast from "@/components/toast/Toast";
 import { AnimatePresence, motion } from "framer-motion";
+import { FaEdit, FaTrash } from "react-icons/fa";
 
 type User = {
   id: number;
@@ -10,6 +11,7 @@ type User = {
   email: string;
   role: string;
   no_hp?: string;
+  password?: string;
 };
 
 type NewUser = {
@@ -36,6 +38,18 @@ const UserAdminPage: React.FC = () => {
   const [deletingUser, setDeletingUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(false);
 
+  // Untuk edit
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [editUserData, setEditUserData] = useState<Omit<User, "id"> & { password?: string }>({
+    fullname: "",
+    username: "",
+    email: "",
+    role: "member",
+    no_hp: "",
+    password: "",
+  });
+
   useEffect(() => {
     fetchUsers();
   }, []);
@@ -54,6 +68,7 @@ const UserAdminPage: React.FC = () => {
     }
   };
 
+  // Tambah user
   const handleAddUser = async () => {
     if (
       !newUser.fullname.trim() ||
@@ -74,54 +89,52 @@ const UserAdminPage: React.FC = () => {
       setToast({ message: "Username minimal 3 karakter dan tanpa spasi", type: "error" });
       return;
     }
-    // Validasi nomor HP (contoh sederhana, bisa dikembangkan)
     const no_hpRegex = /^[0-9]{8,15}$/;
     if (!no_hpRegex.test(newUser.no_hp)) {
       setToast({ message: "Nomor HP harus berupa angka 8-15 digit", type: "error" });
       return;
     }
 
-setLoading(true);
-try {
-  const payload = {
-    fullname: newUser.fullname,
-    username: newUser.username,
-    email: newUser.email,
-    password: newUser.password,
-    role: newUser.role,
-    no_hp: newUser.no_hp,
-    imageUrl: "default-user.jpg",
+    setLoading(true);
+    try {
+      const payload = {
+        fullname: newUser.fullname,
+        username: newUser.username,
+        email: newUser.email,
+        password: newUser.password,
+        role: newUser.role,
+        no_hp: newUser.no_hp,
+        imageUrl: "default-user.jpg",
+      };
+
+      const res = await fetch("/api/users/add", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Gagal menambahkan user");
+
+      setUsers((prev) => [...prev, data]);
+      setToast({ message: "User berhasil ditambahkan", type: "success" });
+      setShowAddModal(false);
+      setNewUser({
+        fullname: "",
+        username: "",
+        email: "",
+        role: "member",
+        password: "",
+        no_hp: "",
+      });
+    } catch (err: any) {
+      setToast({ message: err.message, type: "error" });
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const res = await fetch("/api/users/add", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(payload),
-  });
-
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.message || "Gagal menambahkan user");
-
-  setUsers((prev) => [...prev, data]);
-  setToast({ message: "User berhasil ditambahkan", type: "success" });
-  setShowAddModal(false);
-  setNewUser({
-    fullname: "",
-    username: "",
-    email: "",
-    role: "member",
-    password: "",
-    no_hp: "",
-  });
-} catch (err: any) {
-  setToast({ message: err.message, type: "error" });
-} finally {
-  setLoading(false);
-}
-  };
-
+  // Hapus user
   const handleDeleteUser = async () => {
     if (!deletingUser) return;
     setLoading(true);
@@ -139,6 +152,78 @@ try {
       setToast({ message: err.message, type: "error" });
     } finally {
       setDeletingUser(null);
+      setLoading(false);
+    }
+  };
+
+  // Buka modal edit dan isi data
+  const openEditModal = (user: User) => {
+    setEditingUser(user);
+    setEditUserData({
+      fullname: user.fullname,
+      username: user.username,
+      email: user.email,
+      role: user.role,
+      no_hp: user.no_hp || "",
+      password: "",
+    });
+    setShowEditModal(true);
+  };
+
+  // Submit edit user
+  const handleEditUser = async () => {
+    if (
+      !editUserData.fullname.trim() ||
+      !editUserData.username.trim() ||
+      !editUserData.email.trim()
+    ) {
+      setToast({ message: "Nama, username, dan email wajib diisi", type: "error" });
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(editUserData.email)) {
+      setToast({ message: "Format email tidak valid", type: "error" });
+      return;
+    }
+
+    const payload: any = {
+      id: editingUser?.id,
+      fullname: editUserData.fullname,
+      username: editUserData.username,
+      email: editUserData.email,
+      role: editUserData.role,
+      no_hp: editUserData.no_hp,
+    };
+
+    if (editUserData.password && editUserData.password.trim() !== "") {
+      payload.password = editUserData.password;
+    }
+
+    setLoading(true);
+    try {
+      const res = await fetch("/api/users/edit", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        setToast({ message: errorData.message || "Gagal update user", type: "error" });
+        return;
+      }
+
+      setToast({ message: "User berhasil diperbarui", type: "success" });
+      // Update user list
+      setUsers((prev) =>
+        prev.map((u) => (u.id === editingUser?.id ? { ...u, ...payload } : u))
+      );
+      setShowEditModal(false);
+      setEditingUser(null);
+    } catch (error) {
+      setToast({ message: "Terjadi kesalahan saat menghubungi server", type: "error" });
+    } finally {
       setLoading(false);
     }
   };
@@ -165,7 +250,7 @@ try {
           <p className="text-gray-500">Tidak ada data pengguna.</p>
         ) : (
           <div className="overflow-x-auto bg-white rounded-lg shadow">
-            <table className="min-w-full table-auto">
+            <table className="min-w-full table-auto relative">
               <thead className="bg-gray-100 text-left">
                 <tr>
                   <th className="px-4 py-2 text-black">No</th>
@@ -174,26 +259,49 @@ try {
                   <th className="px-4 py-2 text-black">Email</th>
                   <th className="px-4 py-2 text-black">Nomor HP</th>
                   <th className="px-4 py-2 text-black">Role</th>
-                  <th className="px-4 py-2 text-black text-center">Aksi</th>
+                  <th className="px-4 py-2 text-black text-center relative">Aksi</th>
                 </tr>
               </thead>
               <tbody>
                 {users.map((user, index) => (
-                  <tr key={user.id} className="border-b hover:bg-gray-50">
+                  <tr key={user.id} className="border-b hover:bg-gray-50 relative">
                     <td className="px-4 py-2 text-black">{index + 1}</td>
                     <td className="px-4 py-2 text-black">{user.fullname}</td>
                     <td className="px-4 py-2 text-black">{user.username}</td>
                     <td className="px-4 py-2 text-black">{user.email}</td>
                     <td className="px-4 py-2 text-black">{user.no_hp ?? "-"}</td>
-                    <td className="px-4 py-2 text-black capitalize">{user.role}</td>
-                    <td className="px-4 py-2 text-black text-center">
-                      <button
-                        onClick={() => setDeletingUser(user)}
-                        className="bg-red-600 hover:bg-red-700 text-white text-sm px-3 py-1 rounded-md"
-                        disabled={loading}
-                      >
-                        Hapus
-                      </button>
+                    <td className="px-4 py-2">
+                    <span
+                      className={`px-2 py-1 rounded font-semibold capitalize ${
+                        user.role === "admin"
+                          ? "bg-blue-200 bg-opacity-50 text-blue-800"
+                          : user.role === "member"
+                          ? "bg-green-200 bg-opacity-50 text-green-800"
+                          : "bg-gray-200 text-gray-700"
+                      }`}
+                    >
+                      {user.role}
+                    </span>
+                  </td>
+                    <td className="px-4 py-2 text-black text-center relative">
+                      <div className="absolute top-2 right-2 flex gap-2">
+                        <button
+                          onClick={() => openEditModal(user)}
+                          className="py-2 px-3 rounded-full bg-blue-500 hover:bg-blue-700 transition-all duration-300 text-white cursor-pointer"
+                          disabled={loading}
+                          aria-label={`Edit user ${user.fullname}`}
+                        >
+                          <FaEdit />
+                        </button>
+                        <button
+                          onClick={() => setDeletingUser(user)}
+                          className="py-2 px-3 rounded-full bg-red-500 hover:bg-red-700 transition-all duration-300 text-white cursor-pointer"
+                          disabled={loading}
+                          aria-label={`Hapus user ${user.fullname}`}
+                        >
+                          <FaTrash />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -219,22 +327,19 @@ try {
               className="bg-white p-6 rounded-lg shadow-md w-full max-w-md relative overflow-auto max-h-[90vh]"
             >
               <button
-                onClick={() => {
-                  setShowAddModal(false);
-                  setNewUser((prev) => ({ ...prev, imageFile: null }));
-                }}
+                onClick={() => setShowAddModal(false)}
                 className="absolute top-2 right-2 text-white bg-red-500 w-7 h-7 rounded-full text-center leading-7"
                 disabled={loading}
               >
                 ×
               </button>
-              <h2 className="text-lg font-semibold mb-4 text-gray-800">Tambah Pengguna Baru</h2>
+              <h2 className="text-lg font-semibold mb-4 text-gray-800">Tambah User Baru</h2>
               <div className="space-y-4">
                 <input
                   type="text"
                   placeholder="Nama Lengkap"
                   value={newUser.fullname}
-                  onChange={(e) => setNewUser({ ...newUser, fullname: e.target.value })}
+                  onChange={(e) => setNewUser((prev) => ({ ...prev, fullname: e.target.value }))}
                   className="w-full border px-3 py-2 rounded text-black"
                   disabled={loading}
                 />
@@ -242,7 +347,7 @@ try {
                   type="text"
                   placeholder="Username"
                   value={newUser.username}
-                  onChange={(e) => setNewUser({ ...newUser, username: e.target.value })}
+                  onChange={(e) => setNewUser((prev) => ({ ...prev, username: e.target.value }))}
                   className="w-full border px-3 py-2 rounded text-black"
                   disabled={loading}
                 />
@@ -250,15 +355,7 @@ try {
                   type="email"
                   placeholder="Email"
                   value={newUser.email}
-                  onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
-                  className="w-full border px-3 py-2 rounded text-black"
-                  disabled={loading}
-                />
-                <input
-                  type="password"
-                  placeholder="Password"
-                  value={newUser.password}
-                  onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+                  onChange={(e) => setNewUser((prev) => ({ ...prev, email: e.target.value }))}
                   className="w-full border px-3 py-2 rounded text-black"
                   disabled={loading}
                 />
@@ -266,35 +363,145 @@ try {
                   type="text"
                   placeholder="Nomor HP"
                   value={newUser.no_hp}
-                  onChange={(e) => setNewUser({ ...newUser, no_hp: e.target.value })}
+                  onChange={(e) => setNewUser((prev) => ({ ...prev, no_hp: e.target.value }))}
                   className="w-full border px-3 py-2 rounded text-black"
                   disabled={loading}
                 />
-
+                <input
+                  type="password"
+                  placeholder="Password"
+                  value={newUser.password}
+                  onChange={(e) => setNewUser((prev) => ({ ...prev, password: e.target.value }))}
+                  className="w-full border px-3 py-2 rounded text-black"
+                  disabled={loading}
+                />
                 <select
                   value={newUser.role}
-                  onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
+                  onChange={(e) => setNewUser((prev) => ({ ...prev, role: e.target.value }))}
                   className="w-full border px-3 py-2 rounded text-black"
                   disabled={loading}
                 >
                   <option value="member">Member</option>
                   <option value="admin">Admin</option>
                 </select>
-
-                <button
-                  onClick={handleAddUser}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-md"
-                  disabled={loading}
-                >
-                  {loading ? "Menambahkan..." : "Tambah"}
-                </button>
+                <div className="flex justify-end space-x-2">
+                  <button
+                    onClick={() => setShowAddModal(false)}
+                    className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400 text-black"
+                    disabled={loading}
+                  >
+                    Batal
+                  </button>
+                  <button
+                    onClick={handleAddUser}
+                    className="px-4 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white"
+                    disabled={loading}
+                  >
+                    Simpan
+                  </button>
+                </div>
               </div>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Modal konfirmasi hapus */}
+      {/* Modal Edit User */}
+      <AnimatePresence>
+        {showEditModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center"
+          >
+            <motion.div
+              initial={{ scale: 0.95 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.95 }}
+              className="bg-white p-6 rounded-lg shadow-md w-full max-w-md relative overflow-auto max-h-[90vh]"
+            >
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="absolute top-2 right-2 text-white bg-red-500 w-7 h-7 rounded-full text-center leading-7"
+                disabled={loading}
+              >
+                ×
+              </button>
+              <h2 className="text-lg font-semibold mb-4 text-gray-800">Edit User</h2>
+              <div className="space-y-4">
+                <input
+                  type="text"
+                  placeholder="Nama Lengkap"
+                  value={editUserData.fullname}
+                  onChange={(e) => setEditUserData((prev) => ({ ...prev, fullname: e.target.value }))}
+                  className="w-full border px-3 py-2 rounded text-black"
+                  disabled={loading}
+                />
+                <input
+                  type="text"
+                  placeholder="Username"
+                  value={editUserData.username}
+                  onChange={(e) => setEditUserData((prev) => ({ ...prev, username: e.target.value }))}
+                  className="w-full border px-3 py-2 rounded text-black"
+                  disabled={loading}
+                />
+                <input
+                  type="email"
+                  placeholder="Email"
+                  value={editUserData.email}
+                  onChange={(e) => setEditUserData((prev) => ({ ...prev, email: e.target.value }))}
+                  className="w-full border px-3 py-2 rounded text-black"
+                  disabled={loading}
+                />
+                <input
+                  type="text"
+                  placeholder="Nomor HP"
+                  value={editUserData.no_hp}
+                  onChange={(e) => setEditUserData((prev) => ({ ...prev, no_hp: e.target.value }))}
+                  className="w-full border px-3 py-2 rounded text-black"
+                  disabled={loading}
+                />
+                <input
+                  type="password"
+                  placeholder="Password (kosongkan jika tidak ingin diubah)"
+                  value={editUserData.password}
+                  onChange={(e) => setEditUserData((prev) => ({ ...prev, password: e.target.value }))}
+                  className="w-full border px-3 py-2 rounded text-black"
+                  disabled={loading}
+                />
+                <select
+                  value={editUserData.role}
+                  onChange={(e) => setEditUserData((prev) => ({ ...prev, role: e.target.value }))}
+                  className="w-full border px-3 py-2 rounded text-black"
+                  disabled={loading}
+                >
+                  <option value="member">Member</option>
+                  <option value="admin">Admin</option>
+                </select>
+                <div className="flex justify-end space-x-2">
+                  <button
+                    onClick={() => setShowEditModal(false)}
+                    className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400 text-black"
+                    disabled={loading}
+                  >
+                    Batal
+                  </button>
+                  <button
+                    onClick={handleEditUser}
+                    className="px-4 py-2 rounded bg-green-600 hover:bg-green-700 text-white"
+                    disabled={loading}
+                  >
+                    Simpan
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Modal Konfirmasi Hapus */}
       <AnimatePresence>
         {deletingUser && (
           <motion.div
@@ -304,34 +511,37 @@ try {
             className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center"
           >
             <motion.div
-              initial={{ scale: 0.9 }}
+              initial={{ scale: 0.95 }}
               animate={{ scale: 1 }}
-              exit={{ scale: 0.9 }}
-              className="bg-white p-6 rounded-lg shadow-md max-w-sm"
+              exit={{ scale: 0.95 }}
+              className="bg-white p-6 rounded-lg shadow-md w-full max-w-sm relative"
             >
-              <p className="mb-4 text-black">
-                Apakah Anda yakin ingin menghapus user <b>{deletingUser.fullname}</b>?
+              <h2 className="text-lg font-semibold mb-4 text-gray-800">Konfirmasi Hapus</h2>
+              <p className="mb-6 text-black">
+                Apakah Anda yakin ingin menghapus user{" "}
+                <strong>{deletingUser.fullname}</strong>?
               </p>
-              <div className="flex justify-end gap-4">
+              <div className="flex justify-end space-x-3">
                 <button
                   onClick={() => setDeletingUser(null)}
-                  className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400"
+                  className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400 text-black"
                   disabled={loading}
                 >
                   Batal
                 </button>
                 <button
                   onClick={handleDeleteUser}
-                  className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700"
+                  className="px-4 py-2 rounded bg-red-600 hover:bg-red-700 text-white"
                   disabled={loading}
                 >
-                  {loading ? "Menghapus..." : "Hapus"}
+                  Hapus
                 </button>
               </div>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
+
     </>
   );
 };
