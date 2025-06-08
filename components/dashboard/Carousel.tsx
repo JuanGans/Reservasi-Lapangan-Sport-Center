@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Facility } from "@/types/facility";
+import { useRouter } from "next/router";
 
 const Carousel = ({ facilities }: { facilities: Facility[] }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -8,6 +9,7 @@ const Carousel = ({ facilities }: { facilities: Facility[] }) => {
 
   const touchStartX = useRef<number | null>(null);
   const touchEndX = useRef<number | null>(null);
+  const router = useRouter();
 
   const handleNext = () => {
     setCurrentIndex((prev) => (prev + 1) % facilities.length);
@@ -60,6 +62,10 @@ const Carousel = ({ facilities }: { facilities: Facility[] }) => {
     touchEndX.current = null;
   };
 
+  const handleFieldClick = (fieldId: number) => {
+    router.push(`/member/detail_catalog/${fieldId}`);
+  };
+
   return (
     <div className="flex flex-col items-center justify-center bg-gray-50 px-4 py-6 sm:py-10">
       <h1 className="text-xl sm:text-2xl font-semibold text-blue-900 mb-6 text-center">Selamat Datang, {isLoading ? <span className="inline-block h-5 w-24 bg-gray-300 rounded animate-pulse" /> : name}!</h1>
@@ -73,7 +79,7 @@ const Carousel = ({ facilities }: { facilities: Facility[] }) => {
           <>
             <div className="grid grid-flow-col auto-cols-[100%] transition-transform duration-700 ease-in-out" style={{ transform: `translateX(-${currentIndex * 100}%)` }}>
               {facilities.map((field) => (
-                <div key={field.id} className="h-[300px] relative bg-gray-200 rounded-xl overflow-hidden">
+                <div key={field.id} className="h-[300px] relative bg-gray-200 rounded-xl overflow-hidden cursor-pointer" onClick={() => handleFieldClick(field.id)}>
                   <img src={field.field_image ? `/assets/field/${field.field_image}` : "assets/field/fallback.jpg"} alt={field.field_name} className="absolute inset-0 w-full h-full object-cover object-center" />
 
                   <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 text-white rounded-b-xl">

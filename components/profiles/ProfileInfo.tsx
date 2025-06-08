@@ -51,7 +51,7 @@ const ProfileInfo: React.FC<ProfileInfoProps> = ({ profileData, openProfileModal
           </div>
         </div>
         <div className="flex justify-end mt-4">
-          <button className="bg-blue-500 text-white px-4 py-2 text-sm sm:text-base rounded-md hover:bg-blue-600 transition duration-200" onClick={openProfileModal}>
+          <button className="bg-blue-500 text-white px-4 py-2 text-sm sm:text-base rounded-md hover:bg-blue-600 transition duration-200 cursor-pointer" onClick={openProfileModal}>
             Edit Profile
           </button>
         </div>

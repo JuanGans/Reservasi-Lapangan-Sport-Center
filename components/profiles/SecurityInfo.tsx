@@ -31,7 +31,7 @@ const SecurityInfo: React.FC<SecurityInfoProps> = ({ profileData, openAccountMod
         </div>
 
         <div className="flex justify-end">
-          <button onClick={openAccountModal} className="bg-blue-500 text-white px-4 py-2 text-sm sm:text-base rounded-md hover:bg-blue-600 transition duration-200">
+          <button onClick={openAccountModal} className="bg-blue-500 text-white px-4 py-2 text-sm sm:text-base rounded-md hover:bg-blue-600 transition duration-200 cursor-pointer">
             Ubah Password
           </button>
         </div>

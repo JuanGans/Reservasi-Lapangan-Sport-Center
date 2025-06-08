@@ -1,114 +1,114 @@
-// components/BookingTable.tsx
-import React from "react";
-
-type BookingSessions = {
-  id: number;
-  start_time: string;
-  end_time: string;
-};
-
-type Booking = {
-  id: number;
-  booking_date: string;
-  booking_status: "pending" | "paid" | "canceled" | "completed";
-  durasi_jam?: number;
-  total_harga?: number;
-  user?: {
-    name: string;
-  };
-  facility?: {
-    field_name: string;
-  };
-  sessions?: BookingSessions[];
-};
+import React, { useEffect, useState } from "react";
+import { Booking } from "@/types/booking";
+import BookingDetailModal from "../booking/PopupBookingDetail";
 
 type BookingTableProps = {
   bookings: Booking[];
   filterStatus: "all" | Booking["booking_status"];
   setFilterStatus: (status: "all" | Booking["booking_status"]) => void;
+  role: string;
 };
 
-const BookingTable: React.FC<BookingTableProps> = ({ bookings, filterStatus }) => {
+const BookingTable: React.FC<BookingTableProps> = ({ bookings, filterStatus, role }) => {
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  useEffect(() => {
+    document.body.style.overflow = selectedBooking ? "hidden" : "auto";
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [selectedBooking]);
+
   const handleDetailClick = (id: number) => {
-    // implement detail logic here, e.g. routing or modal
-    console.log("Detail clicked for booking id:", id);
+    const booking = bookings.find((b) => b.id === id) || null;
+    setSelectedBooking(booking);
   };
 
-  const filteredBookings = bookings.filter((booking) => {
-    if (filterStatus === "all") return true;
-    return booking.booking_status === filterStatus;
-  });
+  const handleCloseModal = () => setSelectedBooking(null);
+
+  const filteredBookings = bookings.filter((booking) => (filterStatus === "all" ? true : booking.booking_status === filterStatus));
 
   return (
-    <div className="mt-6 bg-white rounded-md shadow-md p-4 overflow-x-auto">
-      <h2 className="text-xl font-semibold mb-4 text-blue-900">Riwayat Booking</h2>
-      <table className="min-w-full border-collapse border border-gray-300 table-auto">
-        <thead className="bg-gray-50">
-          <tr>
-            <th className="border border-gray-300 p-2 text-gray-500 whitespace-nowrap">No</th>
-            <th className="border border-gray-300 p-2 text-gray-500 whitespace-nowrap">Nama User</th>
-            <th className="border border-gray-300 p-2 text-gray-500 whitespace-nowrap">Nama Lapangan</th>
-            <th className="border border-gray-300 p-2 text-gray-500 whitespace-nowrap">Tanggal Booking</th>
-            <th className="border border-gray-300 p-2 text-gray-500 whitespace-nowrap">Sesi</th>
-            <th className="border border-gray-300 p-2 text-gray-500 whitespace-nowrap">Durasi (Jam)</th>
-            <th className="border border-gray-300 p-2 text-gray-500 whitespace-nowrap">Status</th>
-            <th className="border border-gray-300 p-2 text-gray-500 whitespace-nowrap">Total Harga</th>
-            <th className="border border-gray-300 p-2 text-gray-500 whitespace-nowrap">Aksi</th>
-          </tr>
-        </thead>
+    <div className="mt-6 bg-white rounded-2xl shadow p-4 overflow-x-auto">
+      <h2 className="text-xl font-semibold text-blue-900 mb-4">Riwayat Booking</h2>
 
-        <tbody>
-          {filteredBookings.length === 0 ? (
-            <tr>
-              <td colSpan={9} className="border border-gray-300 px-2 py-4 text-center text-gray-500">
-                Tidak ada booking
-              </td>
+      <div className="min-w-[800px]">
+        <table className="w-full text-sm border-separate border-spacing-y-2">
+          <thead className="text-left text-gray-500">
+            <tr className="bg-gray-50">
+              <th className="px-3 py-2">No</th>
+              {role === "admin" && <th className="px-3 py-2">Nama</th>}
+              <th className="px-3 py-2">Lapangan</th>
+              <th className="px-3 py-2">Tanggal</th>
+              <th className="px-3 py-2">Sesi</th>
+              <th className="px-3 py-2">Durasi</th>
+              <th className="px-3 py-2 text-center">Status</th>
+              <th className="px-3 py-2 text-center">Total</th>
+              <th className="px-3 py-2 text-center">Aksi</th>
             </tr>
-          ) : (
-            filteredBookings.map((booking, index) => (
-              <tr key={booking.id} className="odd:bg-white even:bg-gray-50">
-                <td className="border border-gray-300 p-2 text-gray-700 whitespace-nowrap">{index + 1}</td>
-                <td className="border border-gray-300 p-2 text-gray-700">{booking.user?.name || "-"}</td>
-                <td className="border border-gray-300 p-2 text-gray-700">{booking.facility?.field_name || "-"}</td>
-                <td className="border border-gray-300 p-2 text-gray-700 text-center whitespace-nowrap">
-                  {new Date(booking.booking_date).toLocaleDateString("id-ID", {
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
-                  })}
-                </td>
-                <td className="border border-gray-300 p-2 text-gray-700 text-center">
-                  {booking.sessions && booking.sessions.length > 0 ? (
-                    booking.sessions.map((session) => (
-                      <div key={session.id} className="whitespace-nowrap">
-                        {new Date(session.start_time).toLocaleTimeString("id-ID", {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}{" "}
-                        -{" "}
-                        {new Date(session.end_time).toLocaleTimeString("id-ID", {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </div>
-                    ))
-                  ) : (
-                    <span>-</span>
-                  )}
-                </td>
-                <td className="border border-gray-300 p-2 text-gray-700 text-center whitespace-nowrap">{booking.durasi_jam ?? "-"}</td>
-                <td className="border border-gray-300 p-2 text-gray-700 capitalize text-center whitespace-nowrap">{booking.booking_status}</td>
-                <td className="border border-gray-300 p-2 text-gray-700 text-right whitespace-nowrap">{booking.total_harga !== undefined ? `Rp ${booking.total_harga.toLocaleString("id-ID")}` : "-"}</td>
-                <td className="border border-gray-300 p-2 text-gray-700 text-center flex justify-center whitespace-nowrap">
-                  <button className="flex items-center gap-1 px-3 py-1 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded cursor-pointer whitespace-nowrap" onClick={() => handleDetailClick(booking.id)}>
-                    <i className="fas fa-eye"></i> Lihat Detail
-                  </button>
+          </thead>
+
+          <tbody>
+            {filteredBookings.length === 0 ? (
+              <tr>
+                <td colSpan={8} className="text-center py-6 text-gray-400">
+                  Tidak ada booking ditemukan.
                 </td>
               </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+            ) : (
+              filteredBookings.map((booking, index) => {
+                const durasi = booking.sessions?.reduce((total, session) => {
+                  const start = new Date(session.start_time).getTime();
+                  const end = new Date(session.end_time).getTime();
+                  return total + (end - start) / (1000 * 60); // in minutes
+                }, 0);
+
+                const durasiJam = durasi ? durasi / 60 : 0;
+
+                return (
+                  <tr key={booking.id} className="bg-white shadow-sm rounded-lg">
+                    <td className="px-3 py-2 text-gray-700">{index + 1}</td>
+                    {role === "admin" && <td className="px-3 py-2 text-gray-800">{booking.user?.username}</td>}
+                    <td className="px-3 py-2 font-medium text-gray-800">{booking.facility?.field_name || "-"}</td>
+                    <td className="px-3 py-2 text-gray-700 whitespace-nowrap">
+                      {new Date(booking.booking_date).toLocaleDateString("id-ID", {
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                      })}
+                    </td>
+                    <td className="px-3 py-2 text-gray-700 space-y-1">{booking.sessions && booking.sessions.length > 0 ? booking.sessions.map((session) => <div key={session.id}>{session.session_label}</div>) : <span>-</span>}</td>
+                    <td className="px-3 py-2 text-center text-gray-700 whitespace-nowrap">{durasiJam} Jam</td>
+                    <td className="px-3 py-2 text-center">
+                      <span
+                        className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${
+                          booking.booking_status === "completed"
+                            ? "bg-green-100 text-green-700"
+                            : booking.booking_status === "paid"
+                            ? "bg-blue-100 text-blue-700"
+                            : booking.booking_status === "pending"
+                            ? "bg-yellow-100 text-yellow-700"
+                            : "bg-red-100 text-red-700"
+                        }`}
+                      >
+                        {booking.booking_status}
+                      </span>
+                    </td>
+                    <td className="px-3 py-2 text-center text-gray-700">{booking.total_price !== undefined ? `Rp ${booking.total_price.toLocaleString("id-ID")}` : "-"}</td>
+                    <td className="px-3 py-2 text-center">
+                      <button onClick={() => handleDetailClick(booking.id)} className="px-3 py-1.5 rounded-md bg-blue-600 text-white text-xs hover:bg-blue-700 transition-all duration-200 cursor-pointer">
+                        Lihat Detail
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })
+            )}
+          </tbody>
+        </table>
+
+        {/* Modal Detail */}
+        <BookingDetailModal booking={selectedBooking} onClose={handleCloseModal} />
+      </div>
     </div>
   );
 };

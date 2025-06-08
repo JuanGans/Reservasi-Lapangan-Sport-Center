@@ -3,7 +3,6 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { usePathname } from "next/navigation";
 
 const SIDEBAR_EXPANDED_WIDTH = 256; // 16rem
 const SIDEBAR_COLLAPSED_WIDTH = 80; // 5rem
@@ -81,7 +80,7 @@ const Sidebar: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   };
 
   // Daftar semua href menu sesuai role
-  const menuHrefs = [`/${role.toLowerCase()}`, `/${role.toLowerCase()}/catalog`, `/${role.toLowerCase()}/add-facility`, `/${role.toLowerCase()}/booking`];
+  const menuHrefs = [`/${role.toLowerCase()}`, `/${role.toLowerCase()}/catalog`, `/${role.toLowerCase()}/detail_catalog`, `/${role.toLowerCase()}/booking`];
 
   if (role === "Admin") {
     menuHrefs.push(`/${role.toLowerCase()}/users`, `/${role.toLowerCase()}/transaction`, `/${role.toLowerCase()}/list`);
@@ -92,7 +91,7 @@ const Sidebar: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const path = router.pathname;
 
     // Jika user sedang di add-facility, kita aktifkan katalog
-    if (path === `/${role.toLowerCase()}/add-facility`) {
+    if (path.startsWith(`/${role.toLowerCase()}/detail_catalog/`)) {
       return `/${role.toLowerCase()}/catalog`;
     }
 
@@ -158,23 +157,27 @@ const Sidebar: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       <nav className="flex flex-col space-y-4 text-gray-700 text-sm font-semibold">
         {role === "Member" && (
           <>
-            <p className="text-xs font-bold text-gray-500 px-2">User Menu</p>
+            {/* <motion.p className="text-xs font-bold text-gray-500 px-2 leading-none whitespace-nowrap" initial={false} animate={{ opacity: isCollapsed || isMobileView ? 0 : 1 }} transition={{ duration: 0.2 }}>
+              User Menu
+            </motion.p> */}
             {navItem(`/${role.toLowerCase()}`, "fas fa-th-large", "Dashboard")}
             {navItem(`/${role.toLowerCase()}/catalog`, "fas fa-shopping-cart", "Katalog")}
-            {navItem(`/${role.toLowerCase()}/booking`, "fas fa-calendar-check", "Booking")}
-            {navItem("/member/transaction", "fas fa-file-alt", "Transaksi")}
+            {/* {navItem(`/${role.toLowerCase()}/booking`, "fas fa-calendar-check", "Booking")} */}
+            {/* {navItem(`/${role.toLowerCase()}/transaction`, "fas fa-file-alt", "Transaksi")} */}
           </>
         )}
 
         {role === "Admin" && (
           <>
-            <p className="text-xs font-bold text-gray-500 px-2">Admin Menu</p>
-            {navItem("/admin", "fas fa-th-large", "Dashboard")}
-            {navItem("/admin/catalog", "fas fa-shopping-cart", "Katalog")}
+            {/* <motion.p className="text-xs font-bold text-gray-500 px-2 leading-none whitespace-nowrap" initial={false} animate={{ opacity: isCollapsed || isMobileView ? 0 : 1 }} transition={{ duration: 0.2 }}>
+              Admin Menu
+            </motion.p> */}
+            {navItem(`/${role.toLowerCase()}`, "fas fa-th-large", "Dashboard")}
+            {navItem(`/${role.toLowerCase()}/catalog`, "fas fa-shopping-cart", "Katalog")}
             {navItem(`/${role.toLowerCase()}/booking`, "fas fa-calendar-check", "Booking")}
-            {navItem("/admin/list", "fas fa-list", "Reservations List")}
-            {navItem("/admin/users", "fas fa-users", "Pengguna")}
-            {navItem("/admin/transaction", "fas fa-file-alt", "Transaksi")}
+            {navItem(`/${role.toLowerCase()}/list`, "fas fa-list", "Reservations List")}
+            {navItem(`/${role.toLowerCase()}/users`, "fas fa-users", "Pengguna")}
+            {navItem(`/${role.toLowerCase()}/transaction`, "fas fa-file-alt", "Transaksi")}
           </>
         )}
       </nav>
