@@ -50,52 +50,76 @@ model Bookings {
   facilityId     Int
   booking_date   DateTime
   booking_status BookingStatus    @default(pending)
-  created_at     DateTime         @default(now())
-  updated_at     DateTime         @updatedAt
+  expired_at     DateTime?        // Optional: waktu kedaluwarsa jika belum dibayar
+  total_price    Int              
   sessions       BookingSessions[]
   transaction    Transactions?
   review         Reviews?
+  created_at     DateTime         @default(now())
+  updated_at     DateTime         @updatedAt
 }
+
 
 // ENUM BOOKING STATUS
 enum BookingStatus {
-  pending
-  paid
-  canceled
-  completed
+  pending     // Belum dibayar
+  paid        // Sudah dibayar
+  canceled    // Dibatalkan oleh admin
+  expired     // Kadaluarsa (tidak dibayar dalam waktu tertentu)
+  completed   // Selesai digunakan
 }
 
 // MODEL BOOKING SESSION
 model BookingSessions {
-  id         Int      @id @default(autoincrement())
-  booking    Bookings  @relation(fields: [bookingId], references: [id])
-  bookingId  Int
-  start_time DateTime
-  end_time   DateTime
+  id            Int      @id @default(autoincrement())
+  booking       Bookings @relation(fields: [bookingId], references: [id])
+  bookingId     Int
+  start_time    DateTime
+  end_time      DateTime
+  session_label String   // Contoh: "08:00 - 09:00"
 }
 
-// MODEL TRANSACTION
 model Transactions {
-  id               Int               @id @default(autoincrement())
-  booking          Bookings          @relation(fields: [bookingId], references: [id])
-  bookingId        Int               @unique
-  total            Int
-  method_payment   PaymentMethod     @default(transfer)
-  created_at       DateTime          @default(now())
-  updated_at       DateTime          @updatedAt
+  id              Int               @id @default(autoincrement())
+  booking         Bookings          @relation(fields: [bookingId], references: [id])
+  bookingId       Int               @unique
+  amount          Int
+  status          TransactionStatus @default(pending)
+  payment_method  PaymentMethod     @default(Cash)
+  payment_proof   String?           @db.VarChar(1000)
+  payment_time    DateTime?
+  created_at      DateTime          @default(now())
+  updated_at      DateTime          @updatedAt
 }
 
 // ENUM PAYMENT METHOD
 enum PaymentMethod {
-  transfer
-  credit_card
-  cash
+  Cash
+  Ovo
+  Dana
+  Gopay
+  LinkAja
+  Shopeepay
+  BNI
+  BCA
+  BRI
+  Mandiri
 }
+
+// ENUM UNTUK STATUS TRANSAKSI
+enum TransactionStatus {
+  pending
+  paid
+  failed
+  expired
+  refunded
+}
+
 
 // MODEL REVIEW
 model Reviews {
   id         Int      @id @default(autoincrement())
-  booking    Bookings  @relation(fields: [bookingId], references: [id])
+  booking    Bookings @relation(fields: [bookingId], references: [id])
   bookingId  Int      @unique
   rating     Int
   comment    String?
@@ -110,15 +134,20 @@ model Notifications {
   userId     Int
   message    String
   type       NotificationType @default(info)
+  target_id  Int?             // ID objek yang dituju (Booking, Transaksi, dsb)
   is_read    Boolean          @default(false)
   created_at DateTime         @default(now())
   updated_at DateTime         @updatedAt
 }
 
-// ENUM NOTIFICATION TYPE
+// ENUM UNTUK NOTIFICATION TYPE
 enum NotificationType {
-  info
-  warning
-  success
-  danger
+  info        // notifikasi berkaitan dengan info tambahan -> bisa dihapus notifikasi
+  booking     // notifikasi berkaitan dengan masih booking -> belum di proses
+  payment     // notifikasi berkaitan dengan proses transaksi -> membayar
+  paid        // notifikasi berkaitan dengan pembayaran telah dibayar
+  confirmed   // notifikasi berkaitan dengan booking berhasil dikonfirmasi admin -> bisa dihapus
+  canceled    // notifikasi berkaitan dengan booking ditolak admin atau dibatalkan karena kadaluarsa -> bisa dihapus
+  review      // notifikasi berkaitan dengan review
+  completed   // notifikasi selesai booking -> bisa dihapus notifikasi
 }

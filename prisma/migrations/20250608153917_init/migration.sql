@@ -33,7 +33,9 @@ CREATE TABLE `Bookings` (
     `userId` INTEGER NOT NULL,
     `facilityId` INTEGER NOT NULL,
     `booking_date` DATETIME(3) NOT NULL,
-    `booking_status` ENUM('pending', 'paid', 'canceled', 'completed') NOT NULL DEFAULT 'pending',
+    `booking_status` ENUM('pending', 'paid', 'canceled', 'expired', 'completed') NOT NULL DEFAULT 'pending',
+    `expired_at` DATETIME(3) NULL,
+    `total_price` INTEGER NOT NULL,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` DATETIME(3) NOT NULL,
 
@@ -46,6 +48,7 @@ CREATE TABLE `BookingSessions` (
     `bookingId` INTEGER NOT NULL,
     `start_time` DATETIME(3) NOT NULL,
     `end_time` DATETIME(3) NOT NULL,
+    `session_label` VARCHAR(191) NOT NULL,
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -54,8 +57,11 @@ CREATE TABLE `BookingSessions` (
 CREATE TABLE `Transactions` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `bookingId` INTEGER NOT NULL,
-    `total` INTEGER NOT NULL,
-    `method_payment` ENUM('transfer', 'credit_card', 'cash') NOT NULL DEFAULT 'transfer',
+    `amount` INTEGER NOT NULL,
+    `status` ENUM('pending', 'paid', 'failed', 'expired', 'refunded') NOT NULL DEFAULT 'pending',
+    `payment_method` ENUM('Cash', 'Ovo', 'Dana', 'Gopay', 'LinkAja', 'Shopeepay', 'BNI', 'BCA', 'BRI', 'Mandiri') NOT NULL DEFAULT 'Cash',
+    `payment_proof` VARCHAR(1000) NULL,
+    `payment_time` DATETIME(3) NULL,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` DATETIME(3) NOT NULL,
 
@@ -81,7 +87,8 @@ CREATE TABLE `Notifications` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `userId` INTEGER NOT NULL,
     `message` VARCHAR(191) NOT NULL,
-    `type` ENUM('info', 'warning', 'success', 'danger') NOT NULL DEFAULT 'info',
+    `type` ENUM('info', 'booking', 'payment', 'paid', 'confirmed', 'canceled', 'review', 'completed') NOT NULL DEFAULT 'info',
+    `target_id` INTEGER NULL,
     `is_read` BOOLEAN NOT NULL DEFAULT false,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` DATETIME(3) NOT NULL,
