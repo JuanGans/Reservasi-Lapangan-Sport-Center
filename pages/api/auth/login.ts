@@ -16,7 +16,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const connection = await connectDB();
+    const connection = connectDB();
 
     // Cari user berdasarkan username
     const [rows] = await connection.execute("SELECT * FROM users WHERE username = ?", [username]);
@@ -31,8 +31,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       email: string;
       username: string;
       password: string;
+      no_hp: string;
+      user_img: string;
       role: string;
-      // tambahkan kolom lain jika ada
     };
 
     // Cek password
@@ -53,6 +54,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         fullname: user.fullname,
         email: user.email,
         username: user.username,
+        no_hp: user.no_hp,
+        user_img: user.user_img,
         role: user.role,
       },
       process.env.JWT_SECRET!,

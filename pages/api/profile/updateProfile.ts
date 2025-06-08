@@ -101,7 +101,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     await db.execute("UPDATE users SET fullname = ?, username = ?, email = ?, no_hp = ?, user_img = ? WHERE id = ?", [fullname, username, email, no_hp, user_img, id]);
 
-    const [rows]: any = await db.execute("SELECT id, fullname, username, email, no_hp, user_img FROM users WHERE id = ?", [id]);
+    const [rows]: any = await db.execute("SELECT id, fullname, username, email, no_hp, user_img, role FROM users WHERE id = ?", [id]);
 
     if (!Array.isArray(rows) || rows.length === 0) {
       return res.status(404).json({ message: "User not found after update" });

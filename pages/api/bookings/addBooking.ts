@@ -1,67 +1,63 @@
-import type { NextApiRequest, NextApiResponse } from "next";
-import { connectDB } from "@/lib/db"; // pastikan pathnya benar
+import { NextApiRequest, NextApiResponse } from "next";
+import { PrismaClient } from "@prisma/client";
+import { getUserFromToken } from "@/lib/getUserFromToken"; // path disesuaikan
+const prisma = new PrismaClient();
 
-type Data = {
-  message?: string;
-  bookingId?: number;
-};
-
-export default async function handler(req: NextApiRequest, res: NextApiResponse<Data>) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") {
     return res.status(405).json({ message: "Method not allowed" });
   }
 
-  const { userId, courtId, bookingDate, bookingStatus = "pending", userName, courtName, durationHours, totalPrice, timeSlots } = req.body;
-
-  if (
-    !userId ||
-    !courtId ||
-    !bookingDate ||
-    !userName ||
-    !courtName ||
-    !durationHours ||
-    !totalPrice ||
-    !Array.isArray(timeSlots)
-  ) {
-    return res.status(400).json({ message: "Data tidak lengkap" });
-  }
-
   try {
-    const db = await connectDB();
+    // Ambil token dari cookie
+    const token = req.cookies.token;
+    if (!token) return res.status(401).json({ message: "Unauthorized" });
 
-    // Insert ke bookings
-    const insertBookingQuery = `
-      INSERT INTO bookings (userId, facilityId, booking_date, booking_status, nama_user, nama_lapangan, durasi_jam, total_harga)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
-    const [result]: any = await db.execute(insertBookingQuery, [
-      userId,
-      courtId,
-      bookingDate,
-      bookingStatus,
-      userName,
-      courtName,
-      durationHours,
-      totalPrice,
-    ]);
+    // Ambil user dari token
+    const user = getUserFromToken(token);
+    if (!user) return res.status(401).json({ message: "Token tidak valid" });
 
-    const bookingId = result.insertId;
+    const userId = user.id;
 
-    // Insert ke bookingsessions
-    const insertSessionQuery = `
-      INSERT INTO bookingsessions (bookingId, start_time, end_time)
-      VALUES (?, ?, ?)`;
+    const { facilityId, booking_date, total_price, sessions } = req.body;
 
-    for (const startTimeISO of timeSlots) {
-      const start = new Date(startTimeISO);
-      const end = new Date(start);
-      end.setHours(end.getHours() + 1);
-
-      await db.execute(insertSessionQuery, [bookingId, start, end]);
+    if (!facilityId || !booking_date || !total_price || !Array.isArray(sessions)) {
+      return res.status(400).json({ message: "Data tidak lengkap" });
     }
 
-    return res.status(201).json({ message: "Booking berhasil dibuat", bookingId });
+    // Simpan booking
+    const booking = await prisma.bookings.create({
+      data: {
+        userId,
+        facilityId,
+        booking_date: new Date(booking_date),
+        total_price,
+        sessions: {
+          create: sessions.map((s: { start_time: string; end_time: string }) => ({
+            start_time: new Date(s.start_time),
+            end_time: new Date(s.end_time),
+            session_label: `${new Date(s.start_time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} - ${new Date(s.end_time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`,
+          })),
+        },
+      },
+      include: {
+        facility: true,
+      },
+    });
+
+    // Simpan notifikasi
+    await prisma.notifications.create({
+      data: {
+        userId,
+        message: `Booking lapangan ${booking.facility.field_name} berhasil dibuat.`,
+        type: "booking",
+        target_id: 1,
+      },
+    });
+
+    return res.status(200).json({ message: "Booking berhasil dibuat", booking });
   } catch (error) {
-    console.error("Error adding booking:", error);
-    return res.status(500).json({ message: "Gagal membuat booking" });
+    console.error("Gagal membuat booking:", error);
+    return res.status(500).json({ message: "Terjadi kesalahan saat membuat booking" });
   }
 }

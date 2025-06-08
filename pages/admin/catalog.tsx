@@ -150,7 +150,7 @@ const CatalogAdminPage: React.FC = () => {
 
       {/* Layout dan header */}
       <DashboardLayout title="Katalog Admin">
-        <div className="flex justify-between items-center mb-4 mt-2">
+        <div className="flex justify-between items-center mb-4 mt-6">
           <h2 className="text-blue-900 font-semibold text-xl">Daftar Katalog Lapangan</h2>
           <button onClick={() => setShowAddModal(true)} className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 text-sm py-2 rounded-lg shadow cursor-pointer">
             + Tambah Katalog

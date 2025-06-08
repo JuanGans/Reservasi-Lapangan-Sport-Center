@@ -1,17 +1,21 @@
 import React, { useEffect, useState } from "react";
 import Carousel from "@/components/dashboard/Carousel";
-import BookingTable from "@/components/dashboard/BookingTable";
+import ResponsiveBookingView from "@/components/dashboard/ResponsiveBooking";
 import DashboardLayout from "@/layout/DashboardLayout";
 import { useRouter } from "next/router";
 import Toast from "@/components/toast/Toast";
+import { Booking } from "@/types/booking";
+import { Facility } from "@/types/facility";
+import { useUser } from "@/context/userContext";
 
-type BookingStatus = "all" | "pending" | "paid" | "canceled" | "completed";
+type BookingStatus = "all" | "pending" | "paid" | "canceled" | "completed" | "expired";
 
 const MemberPage: React.FC = () => {
-  const [facilities, setFacilities] = useState<any[]>([]);
+  const [facilities, setFacilities] = useState<Facility[]>([]);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
-  const [bookings, setBookings] = useState<any[]>([]);
+  const [bookings, setBookings] = useState<Booking[]>([]);
   const [filterStatus, setFilterStatus] = useState<BookingStatus>("all");
+  const user = useUser();
   const router = useRouter();
 
   useEffect(() => {
@@ -39,9 +43,21 @@ const MemberPage: React.FC = () => {
   // Mengambil data booking
   useEffect(() => {
     async function fetchBookings() {
-      const res = await fetch("/api/bookings/getAllBookings");
-      const data = await res.json();
-      setBookings(data);
+      try {
+        // 1. Ambil data user login dari /api/me
+        const userRes = await fetch("/api/auth/me");
+        const user = await userRes.json();
+
+        if (!user?.id) throw new Error("User tidak ditemukan");
+
+        // 2. Ambil data booking berdasarkan user.id
+        const res = await fetch(`/api/bookings/getAllBookingsById/${user.id}`);
+        const data = await res.json();
+
+        setBookings(data);
+      } catch (error) {
+        setToast({ message: "Gagal mengambil data booking", type: "error" });
+      }
     }
 
     fetchBookings();
@@ -50,7 +66,7 @@ const MemberPage: React.FC = () => {
   return (
     <>
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
-      <DashboardLayout title="Dashboard">
+      <DashboardLayout title="Dashboard Member">
         {/* Carousel Gambar Lapangan */}
         <Carousel facilities={facilities} />
 
@@ -63,11 +79,12 @@ const MemberPage: React.FC = () => {
             <option value="paid">Selesai Membayar</option>
             <option value="canceled">Dibatalkan</option>
             <option value="completed">Selesai</option>
+            <option value="expired">Kadaluarsa</option>
           </select>
         </div>
 
         {/* Tabel Booking */}
-        <BookingTable bookings={bookings} filterStatus={filterStatus} setFilterStatus={setFilterStatus} />
+        <ResponsiveBookingView bookings={bookings} filterStatus={filterStatus} setFilterStatus={setFilterStatus} role={user.user?.role ?? "member"} />
       </DashboardLayout>
     </>
   );

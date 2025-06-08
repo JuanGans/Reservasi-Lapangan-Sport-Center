@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import DashboardLayout from "@/layout/DashboardLayout";
 import Toast from "@/components/toast/Toast";
 import { AnimatePresence, motion } from "framer-motion";
-import { FaEdit, FaTrash } from "react-icons/fa";
+// import { FaEdit, FaTrash } from "react-icons/fa";
 
 type User = {
   id: number;
@@ -32,7 +32,7 @@ const UserAdminPage: React.FC = () => {
     email: "",
     role: "member",
     password: "",
-    no_hp: ""
+    no_hp: "",
   });
   const [showAddModal, setShowAddModal] = useState(false);
   const [deletingUser, setDeletingUser] = useState<User | null>(null);
@@ -70,13 +70,7 @@ const UserAdminPage: React.FC = () => {
 
   // Tambah user
   const handleAddUser = async () => {
-    if (
-      !newUser.fullname.trim() ||
-      !newUser.username.trim() ||
-      !newUser.email.trim() ||
-      !newUser.password.trim() ||
-      !newUser.no_hp.trim()
-    ) {
+    if (!newUser.fullname.trim() || !newUser.username.trim() || !newUser.email.trim() || !newUser.password.trim() || !newUser.no_hp.trim()) {
       setToast({ message: "Nama, username, email, password, dan nomor HP wajib diisi", type: "error" });
       return;
     }
@@ -172,11 +166,7 @@ const UserAdminPage: React.FC = () => {
 
   // Submit edit user
   const handleEditUser = async () => {
-    if (
-      !editUserData.fullname.trim() ||
-      !editUserData.username.trim() ||
-      !editUserData.email.trim()
-    ) {
+    if (!editUserData.fullname.trim() || !editUserData.username.trim() || !editUserData.email.trim()) {
       setToast({ message: "Nama, username, dan email wajib diisi", type: "error" });
       return;
     }
@@ -216,9 +206,7 @@ const UserAdminPage: React.FC = () => {
 
       setToast({ message: "User berhasil diperbarui", type: "success" });
       // Update user list
-      setUsers((prev) =>
-        prev.map((u) => (u.id === editingUser?.id ? { ...u, ...payload } : u))
-      );
+      setUsers((prev) => prev.map((u) => (u.id === editingUser?.id ? { ...u, ...payload } : u)));
       setShowEditModal(false);
       setEditingUser(null);
     } catch (error) {
@@ -235,11 +223,7 @@ const UserAdminPage: React.FC = () => {
       <DashboardLayout title="Manajemen User">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-blue-900 font-semibold text-xl">Daftar Pengguna</h2>
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
-            disabled={loading}
-          >
+          <button onClick={() => setShowAddModal(true)} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg" disabled={loading}>
             + Tambah User
           </button>
         </div>
@@ -271,18 +255,14 @@ const UserAdminPage: React.FC = () => {
                     <td className="px-4 py-2 text-black">{user.email}</td>
                     <td className="px-4 py-2 text-black">{user.no_hp ?? "-"}</td>
                     <td className="px-4 py-2">
-                    <span
-                      className={`px-2 py-1 rounded font-semibold capitalize ${
-                        user.role === "admin"
-                          ? "bg-blue-200 bg-opacity-50 text-blue-800"
-                          : user.role === "member"
-                          ? "bg-green-200 bg-opacity-50 text-green-800"
-                          : "bg-gray-200 text-gray-700"
-                      }`}
-                    >
-                      {user.role}
-                    </span>
-                  </td>
+                      <span
+                        className={`px-2 py-1 rounded font-semibold capitalize ${
+                          user.role === "admin" ? "bg-blue-200 bg-opacity-50 text-blue-800" : user.role === "member" ? "bg-green-200 bg-opacity-50 text-green-800" : "bg-gray-200 text-gray-700"
+                        }`}
+                      >
+                        {user.role}
+                      </span>
+                    </td>
                     <td className="px-4 py-2 text-black text-center relative">
                       <div className="absolute top-2 right-2 flex gap-2">
                         <button
@@ -291,7 +271,7 @@ const UserAdminPage: React.FC = () => {
                           disabled={loading}
                           aria-label={`Edit user ${user.fullname}`}
                         >
-                          <FaEdit />
+                          {/* <FaEdit /> */}
                         </button>
                         <button
                           onClick={() => setDeletingUser(user)}
@@ -299,7 +279,7 @@ const UserAdminPage: React.FC = () => {
                           disabled={loading}
                           aria-label={`Hapus user ${user.fullname}`}
                         >
-                          <FaTrash />
+                          {/* <FaTrash /> */}
                         </button>
                       </div>
                     </td>
@@ -314,23 +294,9 @@ const UserAdminPage: React.FC = () => {
       {/* Modal Tambah User */}
       <AnimatePresence>
         {showAddModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center"
-          >
-            <motion.div
-              initial={{ scale: 0.95 }}
-              animate={{ scale: 1 }}
-              exit={{ scale: 0.95 }}
-              className="bg-white p-6 rounded-lg shadow-md w-full max-w-md relative overflow-auto max-h-[90vh]"
-            >
-              <button
-                onClick={() => setShowAddModal(false)}
-                className="absolute top-2 right-2 text-white bg-red-500 w-7 h-7 rounded-full text-center leading-7"
-                disabled={loading}
-              >
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
+            <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} className="bg-white p-6 rounded-lg shadow-md w-full max-w-md relative overflow-auto max-h-[90vh]">
+              <button onClick={() => setShowAddModal(false)} className="absolute top-2 right-2 text-white bg-red-500 w-7 h-7 rounded-full text-center leading-7" disabled={loading}>
                 ×
               </button>
               <h2 className="text-lg font-semibold mb-4 text-gray-800">Tambah User Baru</h2>
@@ -343,30 +309,9 @@ const UserAdminPage: React.FC = () => {
                   className="w-full border px-3 py-2 rounded text-black"
                   disabled={loading}
                 />
-                <input
-                  type="text"
-                  placeholder="Username"
-                  value={newUser.username}
-                  onChange={(e) => setNewUser((prev) => ({ ...prev, username: e.target.value }))}
-                  className="w-full border px-3 py-2 rounded text-black"
-                  disabled={loading}
-                />
-                <input
-                  type="email"
-                  placeholder="Email"
-                  value={newUser.email}
-                  onChange={(e) => setNewUser((prev) => ({ ...prev, email: e.target.value }))}
-                  className="w-full border px-3 py-2 rounded text-black"
-                  disabled={loading}
-                />
-                <input
-                  type="text"
-                  placeholder="Nomor HP"
-                  value={newUser.no_hp}
-                  onChange={(e) => setNewUser((prev) => ({ ...prev, no_hp: e.target.value }))}
-                  className="w-full border px-3 py-2 rounded text-black"
-                  disabled={loading}
-                />
+                <input type="text" placeholder="Username" value={newUser.username} onChange={(e) => setNewUser((prev) => ({ ...prev, username: e.target.value }))} className="w-full border px-3 py-2 rounded text-black" disabled={loading} />
+                <input type="email" placeholder="Email" value={newUser.email} onChange={(e) => setNewUser((prev) => ({ ...prev, email: e.target.value }))} className="w-full border px-3 py-2 rounded text-black" disabled={loading} />
+                <input type="text" placeholder="Nomor HP" value={newUser.no_hp} onChange={(e) => setNewUser((prev) => ({ ...prev, no_hp: e.target.value }))} className="w-full border px-3 py-2 rounded text-black" disabled={loading} />
                 <input
                   type="password"
                   placeholder="Password"
@@ -375,28 +320,15 @@ const UserAdminPage: React.FC = () => {
                   className="w-full border px-3 py-2 rounded text-black"
                   disabled={loading}
                 />
-                <select
-                  value={newUser.role}
-                  onChange={(e) => setNewUser((prev) => ({ ...prev, role: e.target.value }))}
-                  className="w-full border px-3 py-2 rounded text-black"
-                  disabled={loading}
-                >
+                <select value={newUser.role} onChange={(e) => setNewUser((prev) => ({ ...prev, role: e.target.value }))} className="w-full border px-3 py-2 rounded text-black" disabled={loading}>
                   <option value="member">Member</option>
                   <option value="admin">Admin</option>
                 </select>
                 <div className="flex justify-end space-x-2">
-                  <button
-                    onClick={() => setShowAddModal(false)}
-                    className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400 text-black"
-                    disabled={loading}
-                  >
+                  <button onClick={() => setShowAddModal(false)} className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400 text-black" disabled={loading}>
                     Batal
                   </button>
-                  <button
-                    onClick={handleAddUser}
-                    className="px-4 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white"
-                    disabled={loading}
-                  >
+                  <button onClick={handleAddUser} className="px-4 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white" disabled={loading}>
                     Simpan
                   </button>
                 </div>
@@ -409,23 +341,9 @@ const UserAdminPage: React.FC = () => {
       {/* Modal Edit User */}
       <AnimatePresence>
         {showEditModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center"
-          >
-            <motion.div
-              initial={{ scale: 0.95 }}
-              animate={{ scale: 1 }}
-              exit={{ scale: 0.95 }}
-              className="bg-white p-6 rounded-lg shadow-md w-full max-w-md relative overflow-auto max-h-[90vh]"
-            >
-              <button
-                onClick={() => setShowEditModal(false)}
-                className="absolute top-2 right-2 text-white bg-red-500 w-7 h-7 rounded-full text-center leading-7"
-                disabled={loading}
-              >
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
+            <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} className="bg-white p-6 rounded-lg shadow-md w-full max-w-md relative overflow-auto max-h-[90vh]">
+              <button onClick={() => setShowEditModal(false)} className="absolute top-2 right-2 text-white bg-red-500 w-7 h-7 rounded-full text-center leading-7" disabled={loading}>
                 ×
               </button>
               <h2 className="text-lg font-semibold mb-4 text-gray-800">Edit User</h2>
@@ -470,28 +388,15 @@ const UserAdminPage: React.FC = () => {
                   className="w-full border px-3 py-2 rounded text-black"
                   disabled={loading}
                 />
-                <select
-                  value={editUserData.role}
-                  onChange={(e) => setEditUserData((prev) => ({ ...prev, role: e.target.value }))}
-                  className="w-full border px-3 py-2 rounded text-black"
-                  disabled={loading}
-                >
+                <select value={editUserData.role} onChange={(e) => setEditUserData((prev) => ({ ...prev, role: e.target.value }))} className="w-full border px-3 py-2 rounded text-black" disabled={loading}>
                   <option value="member">Member</option>
                   <option value="admin">Admin</option>
                 </select>
                 <div className="flex justify-end space-x-2">
-                  <button
-                    onClick={() => setShowEditModal(false)}
-                    className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400 text-black"
-                    disabled={loading}
-                  >
+                  <button onClick={() => setShowEditModal(false)} className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400 text-black" disabled={loading}>
                     Batal
                   </button>
-                  <button
-                    onClick={handleEditUser}
-                    className="px-4 py-2 rounded bg-green-600 hover:bg-green-700 text-white"
-                    disabled={loading}
-                  >
+                  <button onClick={handleEditUser} className="px-4 py-2 rounded bg-green-600 hover:bg-green-700 text-white" disabled={loading}>
                     Simpan
                   </button>
                 </div>
@@ -504,36 +409,17 @@ const UserAdminPage: React.FC = () => {
       {/* Modal Konfirmasi Hapus */}
       <AnimatePresence>
         {deletingUser && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center"
-          >
-            <motion.div
-              initial={{ scale: 0.95 }}
-              animate={{ scale: 1 }}
-              exit={{ scale: 0.95 }}
-              className="bg-white p-6 rounded-lg shadow-md w-full max-w-sm relative"
-            >
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
+            <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} className="bg-white p-6 rounded-lg shadow-md w-full max-w-sm relative">
               <h2 className="text-lg font-semibold mb-4 text-gray-800">Konfirmasi Hapus</h2>
               <p className="mb-6 text-black">
-                Apakah Anda yakin ingin menghapus user{" "}
-                <strong>{deletingUser.fullname}</strong>?
+                Apakah Anda yakin ingin menghapus user <strong>{deletingUser.fullname}</strong>?
               </p>
               <div className="flex justify-end space-x-3">
-                <button
-                  onClick={() => setDeletingUser(null)}
-                  className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400 text-black"
-                  disabled={loading}
-                >
+                <button onClick={() => setDeletingUser(null)} className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400 text-black" disabled={loading}>
                   Batal
                 </button>
-                <button
-                  onClick={handleDeleteUser}
-                  className="px-4 py-2 rounded bg-red-600 hover:bg-red-700 text-white"
-                  disabled={loading}
-                >
+                <button onClick={handleDeleteUser} className="px-4 py-2 rounded bg-red-600 hover:bg-red-700 text-white" disabled={loading}>
                   Hapus
                 </button>
               </div>
@@ -541,7 +427,6 @@ const UserAdminPage: React.FC = () => {
           </motion.div>
         )}
       </AnimatePresence>
-
     </>
   );
 };

@@ -60,7 +60,9 @@ const AdminListPage: React.FC = () => {
             <tbody>
               {bookings.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="text-center py-6 text-gray-500">Tidak ada data</td>
+                  <td colSpan={8} className="text-center py-6 text-gray-500">
+                    Tidak ada data
+                  </td>
                 </tr>
               ) : (
                 bookings.map((booking, index) => (
@@ -69,9 +71,7 @@ const AdminListPage: React.FC = () => {
                     <td className="px-4 py-2 border">{booking.user?.name || "N/A"}</td>
                     <td className="px-4 py-2 border">{booking.facility?.field_name || "N/A"}</td>
                     <td className="px-4 py-2 border">{booking.date}</td>
-                    <td className="px-4 py-2 border">
-                      {booking.sessions.map((s) => s.start_time).join(", ")}
-                    </td>
+                    <td className="px-4 py-2 border">{booking.sessions.map((s) => s.start_time).join(", ")}</td>
                     <td className="px-4 py-2 border">{booking.duration}</td>
                     <td className="px-4 py-2 border">{booking.status}</td>
                     <td className="px-4 py-2 border">Rp {booking.total_price.toLocaleString("id-ID")}</td>

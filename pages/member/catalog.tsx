@@ -72,7 +72,7 @@ const MemberCatalogPage: React.FC = () => {
     <>
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
       <DashboardLayout title="Katalog Member">
-        <h2 className="text-blue-900 font-semibold text-xl mb-6">Katalog Lapangan</h2>
+        <h2 className="text-blue-900 font-semibold text-xl my-6">Katalog Lapangan</h2>
 
         <SearchAndSort searchTerm={searchTerm} onSearchChange={handleSearchChange} sortOrder={sortOrder} onSortChange={handleSortChange} />
 

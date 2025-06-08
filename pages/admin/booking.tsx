@@ -29,58 +29,55 @@ export default function BookingPage() {
   useEffect(() => {
     // Ambil data user
     fetch("/api/auth/me")
-      .then(res => res.json())
-      .then(data => setUserName(data.fullname))
+      .then((res) => res.json())
+      .then((data) => setUserName(data.fullname))
       .catch(() => setUserName(""));
 
     // Ambil data lapangan
     fetch("/api/facilities/getAllFacilities")
-      .then(res => res.json())
-      .then(data => setFacilities(data));
+      .then((res) => res.json())
+      .then((data) => setFacilities(data));
   }, []);
 
   const handleSlotToggle = (slot: string) => {
-    setSelectedSlots(prev =>
-      prev.includes(slot) ? prev.filter(s => s !== slot) : [...prev, slot].sort()
-    );
+    setSelectedSlots((prev) => (prev.includes(slot) ? prev.filter((s) => s !== slot) : [...prev, slot].sort()));
   };
 
-const handleSubmit = async () => {
-  if (!selectedFacility || !selectedDate || selectedSlots.length === 0) {
-    setToast({ message: "Lengkapi semua field!", type: "error" });
-    return;
-  }
+  const handleSubmit = async () => {
+    if (!selectedFacility || !selectedDate || selectedSlots.length === 0) {
+      setToast({ message: "Lengkapi semua field!", type: "error" });
+      return;
+    }
 
-  const payload = {
-    userId: 1, // 🔧 ganti dengan user ID asli dari session kalau ada 
-    userName: userName,
-    courtId: selectedFacility.id,
-    courtName: selectedFacility.field_name,
-    bookingDate: selectedDate,
-    durationHours: duration,
-    totalPrice: totalPrice,
-    timeSlots: selectedSlots.map(slot => {
-      const iso = new Date(`${selectedDate}T${slot}:00`).toISOString();
-      return iso;
-    })
+    const payload = {
+      userId: 1, // 🔧 ganti dengan user ID asli dari session kalau ada
+      userName: userName,
+      courtId: selectedFacility.id,
+      courtName: selectedFacility.field_name,
+      bookingDate: selectedDate,
+      durationHours: duration,
+      totalPrice: totalPrice,
+      timeSlots: selectedSlots.map((slot) => {
+        const iso = new Date(`${selectedDate}T${slot}:00`).toISOString();
+        return iso;
+      }),
+    };
+
+    const response = await fetch("/api/bookings/addBooking", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    if (response.ok) {
+      setToast({ message: "Reservasi berhasil!", type: "success" });
+      setSelectedDate("");
+      setSelectedFacility(null);
+      setSelectedSlots([]);
+    } else {
+      setToast({ message: "Gagal melakukan reservasi", type: "error" });
+    }
   };
-
-  const response = await fetch("/api/bookings/addBooking", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
-  });
-
-  if (response.ok) {
-    setToast({ message: "Reservasi berhasil!", type: "success" });
-    setSelectedDate("");
-    setSelectedFacility(null);
-    setSelectedSlots([]);
-  } else {
-    setToast({ message: "Gagal melakukan reservasi", type: "error" });
-  }
-};
-
 
   return (
     <>
@@ -97,21 +94,13 @@ const handleSubmit = async () => {
           <div className="mb-4">
             <label className="block text-gray-700 font-semibold mb-1">Pilih Lapangan</label>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {facilities.map(facility => (
+              {facilities.map((facility) => (
                 <div
                   key={facility.id}
                   onClick={() => setSelectedFacility(facility)}
-                  className={`cursor-pointer border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition ${
-                    selectedFacility?.id === facility.id ? "ring-2 ring-green-500" : ""
-                  }`}
+                  className={`cursor-pointer border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition ${selectedFacility?.id === facility.id ? "ring-2 ring-green-500" : ""}`}
                 >
-                  <Image
-                    src={facility.field_image}
-                    alt={facility.field_name}
-                    width={300}
-                    height={200}
-                    className="object-cover w-full h-32"
-                  />
+                  <Image src={facility.field_image} alt={facility.field_name} width={300} height={200} className="object-cover w-full h-32" />
                   <div className="p-2">
                     <h3 className="font-semibold text-gray-600 text-sm">{facility.field_name}</h3>
                     <p className="text-xs text-gray-600">Rp {facility.price_per_session.toLocaleString("id-ID")}/sesi</p>
@@ -123,12 +112,7 @@ const handleSubmit = async () => {
 
           <div className="mb-4">
             <label className="block text-gray-700 font-semibold mb-1">Tanggal Booking</label>
-            <input
-              type="date"
-              value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
-              className="w-full px-4 py-2 border rounded-md text-black"
-            />
+            <input type="date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} className="w-full px-4 py-2 border rounded-md text-black" />
           </div>
 
           <div className="mb-4">
@@ -137,14 +121,7 @@ const handleSubmit = async () => {
               {hours.map(({ start, end }) => {
                 const isSelected = selectedSlots.includes(start);
                 return (
-                  <button
-                    key={start}
-                    type="button"
-                    onClick={() => handleSlotToggle(start)}
-                    className={`text-sm border px-2 py-1 rounded ${
-                      isSelected ? "bg-green-600 text-white" : "bg-white text-gray-700 hover:bg-green-100"
-                    }`}
-                  >
+                  <button key={start} type="button" onClick={() => handleSlotToggle(start)} className={`text-sm border px-2 py-1 rounded ${isSelected ? "bg-green-600 text-white" : "bg-white text-gray-700 hover:bg-green-100"}`}>
                     {start} - {end}
                   </button>
                 );
@@ -152,17 +129,10 @@ const handleSubmit = async () => {
             </div>
           </div>
 
-          <div className="mt-6 text-lg font-semibold text-gray-800">
-            Durasi: {duration} jam
-          </div>
-          <div className="text-lg font-semibold text-gray-800">
-            Total Harga: Rp {totalPrice.toLocaleString("id-ID")}
-          </div>
+          <div className="mt-6 text-lg font-semibold text-gray-800">Durasi: {duration} jam</div>
+          <div className="text-lg font-semibold text-gray-800">Total Harga: Rp {totalPrice.toLocaleString("id-ID")}</div>
 
-          <button
-            onClick={handleSubmit}
-            className="mt-6 w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700"
-          >
+          <button onClick={handleSubmit} className="mt-6 w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700">
             Reservasi Sekarang
           </button>
         </div>
