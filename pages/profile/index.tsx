@@ -8,34 +8,24 @@ import UpdatePasswordModal from "@/components/profiles/modal/UpdatePasswordModal
 import DeleteAccountModal from "@/components/profiles/modal/DeleteAccountModal";
 import DashboardLayout from "@/layout/DashboardLayout";
 import Toast from "@/components/toast/Toast";
-// import { UserContext } from "@/context/userContext";
-
-interface ProfileData {
-  id: number;
-  username: string;
-  fullname: string;
-  email: string;
-  no_hp: string;
-  user_img: string;
-  role: string;
-}
+import { useUser } from "@/context/userContext";
+import { User } from "@/types/user";
 
 const Profile: React.FC = () => {
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
   const [activeTab, setActiveTab] = useState<"profil" | "keamanan" | "hapus-akun">("profil");
-  const [profileData, setProfileData] = useState<ProfileData | null>(null);
+  const [profileData, setProfileData] = useState<User | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isPersonalInfoModalOpen, setIsPersonalInfoModalOpen] = useState(false);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
-
-  // const { setUser } = useContext(UserContext);
+  const { setUser } = useUser();
 
   // Fetch profile data
   const fetchUserData = async () => {
     try {
       const res = await fetch("/api/auth/me");
       if (!res.ok) throw new Error("Failed to fetch user data.");
-      const data: ProfileData = await res.json();
+      const data: User = await res.json();
       setProfileData(data);
     } catch (error) {
       console.error("Error fetching user data:", error);
@@ -47,7 +37,7 @@ const Profile: React.FC = () => {
   }, []);
 
   // MENGIRIM PROFIL KE API UPDATE PROFIL
-  const handleSaveProfile = async (updated: ProfileData & { file?: File }) => {
+  const handleSaveProfile = async (updated: User & { file?: File | null }) => {
     const formData = new FormData();
     formData.append("fullname", updated.fullname);
     formData.append("username", updated.username);
@@ -70,7 +60,7 @@ const Profile: React.FC = () => {
     setProfileData(data);
 
     // MEMASUKKAN DATA USER KE USER CONTEXT
-    // setUser(data);
+    setUser(data);
 
     // TOAST
     setToast({ message: "Profil berhasil diperbarui", type: "success" });
@@ -128,6 +118,7 @@ const Profile: React.FC = () => {
               username: profileData.username,
               no_hp: profileData.no_hp,
               user_img: profileData.user_img,
+              role: profileData.role,
             }}
             onSave={(updatedData) => handleSaveProfile({ ...profileData, ...updatedData })}
           />

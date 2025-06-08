@@ -104,7 +104,7 @@ export default function Home() {
         </section>
 
         {/* CATALOG */}
-        <section className="bg-blue-100 px-4 sm:px-6 py-10">
+        <section className="bg-blue-100 px-4 sm:px-6 py-10 overflow-hidden">
           <div className="text-center mb-8">
             <LandingAnimation>
               <h2 className="text-3xl font-bold text-blue-900 mb-2">Katalog Lapangan</h2>
@@ -116,9 +116,9 @@ export default function Home() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {Array.isArray(facilities) &&
-              facilities.map((field) => (
+              facilities.slice(0, 6).map((field) => (
                 <LandingAnimation key={field.id} delay={field.id * 0.1}>
-                  <div className="bg-white shadow-md rounded-lg p-4 hover:scale-105 transition cursor-pointer" onClick={() => setSelectedField(field)}>
+                  <div className="bg-white shadow-md rounded-lg p-4 hover:scale-105 transition cursor-pointer overflow-hidden" onClick={() => setSelectedField(field)}>
                     <img src={field.field_image ? `/assets/field/${field.field_image}` : "/fallback.jpg"} alt={field.field_name} className="rounded-md mb-3 w-full h-48 object-cover" />
                     <h3 className="text-blue-900 font-bold mb-2">{field.field_name}</h3>
                     <p className="text-gray-600 text-sm">{field.field_desc}</p>

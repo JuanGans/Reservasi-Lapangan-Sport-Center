@@ -4,49 +4,58 @@ import { useEffect, useState } from "react";
 import Toast from "@/components/toast/Toast";
 import { AnimatePresence, motion } from "framer-motion";
 import LandingAnimation from "@/components/animation/LandingAnimation";
-
-interface FieldType {
-  id: number;
-  field_name: string;
-  field_desc: string;
-  field_image?: string;
-  price_per_session: string;
-  avg_rating?: number;
-  total_review?: number;
-}
+import { sessions } from "@/utils/session";
+import { Facility } from "@/types/facility";
+import ReviewSection from "@/components/reviews/ReviewSection";
+import { Review } from "@/types/review";
 
 export default function DetailCatalog() {
   const router = useRouter();
   const { id } = router.query;
 
-  const [field, setField] = useState<FieldType | null>(null);
-  const [allFields, setAllFields] = useState<FieldType[]>([]);
+  const [field, setField] = useState<Facility | null>(null);
+  const [allFields, setAllFields] = useState<Facility[]>([]);
   const [selectedSessions, setSelectedSessions] = useState<string[]>([]);
   const [recommendationSeed, setRecommendationSeed] = useState(Math.random());
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
   const [showLoginPopup, setShowLoginPopup] = useState(false);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [loading, setLoading] = useState(false);
 
   const [selectedDate, setSelectedDate] = useState<string>("");
-  const today = new Date().toISOString().split("T")[0]; // Format YYYY-MM-DD
+  const today = new Date().toISOString().split("T")[0];
+  const [bookedSessions, setBookedSessions] = useState<string[]>([]);
 
-  const sessions = [
-    "08:00 - 09:00",
-    "09:00 - 10:00",
-    "10:00 - 11:00",
-    "11:00 - 12:00",
-    "12:00 - 13:00",
-    "13:00 - 14:00",
-    "14:00 - 15:00",
-    "15:00 - 16:00",
-    "16:00 - 17:00",
-    "17:00 - 18:00",
-    "18.00 - 19.00",
-    "19:00 - 20:00",
-    "20:00 - 21.00",
-    "21.00 - 22.00",
-    "22.00 - 23.00",
-    "23.00 - 24.00",
-  ];
+  useEffect(() => {
+    if (!selectedDate || !field?.id) return;
+
+    const fetchBookedSessions = async () => {
+      try {
+        const res = await fetch("/api/bookings/getAllBookings");
+        const data = await res.json();
+
+        const sameDayBookings = data.filter((b: any) => b.facilityId === field.id && new Date(b.booking_date).toISOString().split("T")[0] === selectedDate);
+
+        const booked: string[] = [];
+
+        sameDayBookings.forEach((b: any) => {
+          b.sessions.forEach((s: any) => {
+            const start = new Date(s.start_time);
+            const end = new Date(s.end_time);
+
+            const formatted = `${start.getHours().toString().padStart(2, "0")}:${start.getMinutes().toString().padStart(2, "0")} - ${end.getHours().toString().padStart(2, "0")}:${end.getMinutes().toString().padStart(2, "0")}`;
+            booked.push(formatted);
+          });
+        });
+
+        setBookedSessions(booked);
+      } catch (err) {
+        console.error("Gagal mengambil data booking:", err);
+      }
+    };
+
+    fetchBookedSessions();
+  }, [selectedDate, field]);
 
   useEffect(() => {
     if (id) {
@@ -55,8 +64,8 @@ export default function DetailCatalog() {
         .then((data) => {
           setField(data);
           setRecommendationSeed(Math.random());
-          setSelectedDate(""); // 🧹 Reset tanggal
-          setSelectedSessions([]); // 🧹 Reset sesi
+          setSelectedDate("");
+          setSelectedSessions([]);
         })
         .catch((err) => console.error("Gagal ambil data:", err));
     }
@@ -68,6 +77,20 @@ export default function DetailCatalog() {
       .then((data) => setAllFields(data))
       .catch((err) => console.error("Gagal ambil semua fasilitas:", err));
   }, []);
+
+  useEffect(() => {
+    const fetchReviews = async () => {
+      const res = await fetch(`/api/reviews/getAllReviewsByFacilitiesId/${id}`);
+      const data = await res.json();
+      if (Array.isArray(data)) {
+        setReviews(data);
+      } else {
+        console.error("Expected an array, got:", data);
+      }
+    };
+
+    fetchReviews();
+  }, [id]);
 
   const toggleSession = (session: string) => {
     setSelectedSessions((prev) => (prev.includes(session) ? prev.filter((s) => s !== session) : [...prev, session]));
@@ -94,35 +117,38 @@ export default function DetailCatalog() {
     };
   }, [showLoginPopup]);
 
-  const isSessionDisabled = (sessionTime: string) => {
+  const handleSignIn = async () => {
+    setLoading(true);
+    await router.push("/login");
+  };
+
+  const isSessionDisabled = (sessionLabel: string) => {
     if (!selectedDate) return false;
 
-    const sessionStartHour = parseInt(sessionTime.split(":")[0]); // Misalnya 08 dari "08:00 - 09:00"
-    const selected = new Date(selectedDate);
     const now = new Date();
+    const selected = new Date(selectedDate);
 
-    if (
-      selected.toDateString() === now.toDateString() && // Jika tanggal = hari ini
-      sessionStartHour <= now.getHours() // Dan jam sesi sudah lewat
-    ) {
+    // Cek jika tanggalnya adalah hari ini, dan sesi sudah lewat
+    const [startHourStr, startMinuteStr] = sessionLabel.split(" - ")[0].split(":");
+    const sessionStart = new Date(selected);
+    sessionStart.setHours(parseInt(startHourStr), parseInt(startMinuteStr), 0, 0);
+
+    if (selected.toDateString() === now.toDateString() && sessionStart <= now) {
       return true;
     }
 
-    return false;
+    // Cek apakah sesi ini sudah dibooking oleh orang lain
+    return bookedSessions.includes(sessionLabel);
   };
 
-  // Reset sesi yang disabled saat tanggal berubah
   useEffect(() => {
     if (!selectedDate) return;
-
     setSelectedSessions((prev) => prev.filter((session) => !isSessionDisabled(session)));
-  }, [selectedDate]);
+  }, [selectedDate, bookedSessions]);
 
   const formatTanggal = (iso: string) => {
     return new Date(iso).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
   };
-
-  // Contoh: formatTanggal(selectedDate) → "21 Mei 2025"
 
   const recommended = allFields
     .filter((f) => f.id !== Number(id))
@@ -181,7 +207,9 @@ export default function DetailCatalog() {
                   <p className="text-xl font-semibold text-blue-800">Rp. {parseInt(field.price_per_session).toLocaleString()} / sesi</p>
                 </LandingAnimation>
                 <LandingAnimation delay={0.2}>
-                  <p className="text-yellow-500 text-lg">⭐ {field.avg_rating ?? "-"} / 5</p>
+                  <p className="text-yellow-500 md:text-lg text-sm">
+                    ⭐ {field.avg_rating ?? "-"} / 5<span className="text-gray-500 ml-3">({field.total_review ?? "-"} Ulasan)</span>
+                  </p>
                 </LandingAnimation>
 
                 <LandingAnimation delay={0.2}>
@@ -230,7 +258,11 @@ export default function DetailCatalog() {
                   <p className="text-lg font-semibold text-gray-800 mt-4">Total: Rp. {field ? (parseInt(field.price_per_session) * selectedSessions.length).toLocaleString() : "0"}</p>
                 </LandingAnimation>
 
-                <button onClick={handleBooking} className="bg-blue-600 text-white py-3 mt-2 rounded-md hover:bg-blue-700 transition text-lg cursor-pointer">
+                <button
+                  onClick={handleBooking}
+                  disabled={!selectedDate || selectedSessions.length === 0}
+                  className={`bg-blue-600 text-white font-semibold px-6 py-3 rounded-lg shadow-md transition-color cursor-pointer ${!selectedDate || selectedSessions.length === 0 ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-700"}`}
+                >
                   <LandingAnimation>Booking Sekarang</LandingAnimation>
                 </button>
               </div>
@@ -259,6 +291,9 @@ export default function DetailCatalog() {
             </>
           )}
         </section>
+
+        {/* REVIEW SECTION */}
+        {/* {field && <ReviewSection reviews={reviews} />} */}
 
         {/* RECOMMENDED FIELDS */}
         <section className="max-w-7xl mx-auto px-4 pb-10 bg-blue-100">
@@ -307,8 +342,9 @@ export default function DetailCatalog() {
                 </button>
                 <h2 className="text-xl font-bold text-blue-900 mb-2">Anda Belum Login</h2>
                 <p className="text-gray-600 mb-4 text-sm">Silakan login terlebih dahulu untuk melanjutkan proses booking.</p>
-                <button onClick={() => router.push("/login")} className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition cursor-pointer">
-                  Login Sekarang
+                <button onClick={handleSignIn} disabled={loading} className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition cursor-pointer">
+                  {loading && <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin inline-block mr-2" />}
+                  {loading ? "Loading..." : "Login Sekarang"}
                 </button>
               </motion.div>
             </motion.div>
