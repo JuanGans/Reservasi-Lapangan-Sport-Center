@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Head from "next/head";
 
 const teamImages = ["/assets/team/alifia_team.png", "/assets/team/ello_team.png", "/assets/team/juan_team.png", "/assets/team/imam_team.png", "/assets/team/abhel_team.png"];
 
@@ -41,29 +42,34 @@ export default function NotFound() {
   }, [router]);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-6 text-center">
-      <h1 className="text-5xl font-bold text-blue-800 mb-3">404</h1>
-      <p className="text-lg text-gray-600 mb-4">Halaman tidak ditemukan.</p>
+    <>
+      <Head>
+        <title>404 Not Found</title>
+      </Head>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-6 text-center">
+        <h1 className="text-5xl font-bold text-blue-800 mb-3">404</h1>
+        <p className="text-lg text-gray-600 mb-4">Halaman tidak ditemukan.</p>
 
-      <div className="w-36 h-36 mb-4 rounded-full overflow-hidden border-4 border-white shadow">
-        {randomImage ? <img src={randomImage} alt="Random Person" className="object-cover w-full h-full" /> : <div className="w-full h-full bg-gray-200 animate-pulse" />}
-      </div>
-
-      {loading ? (
-        <div className="flex flex-col items-center space-y-2 text-gray-500">
-          <div className="w-8 h-8 border-4 border-blue-300 border-t-blue-700 rounded-full animate-spin"></div>
-          <p className="text-sm">Memuat data pengguna...</p>
+        <div className="w-36 h-36 mb-4 rounded-full overflow-hidden border-4 border-white shadow">
+          {randomImage ? <img src={randomImage} alt="Random Person" className="object-cover w-full h-full" /> : <div className="w-full h-full bg-gray-200 animate-pulse" />}
         </div>
-      ) : (
-        <>
-          <p className="text-sm text-gray-500 mb-4">
-            Mengalihkan ke <strong>{role === "admin" || role === "member" ? `dashboard ${role}` : "beranda"}</strong> dalam 5 detik...
-          </p>
-          <button onClick={() => router.push(role === "admin" || role === "member" ? `/${role}` : `/`)} className="bg-blue-700 text-white px-5 py-2 rounded hover:bg-blue-800 transition cursor-pointer">
-            Kembali Sekarang
-          </button>
-        </>
-      )}
-    </div>
+
+        {loading ? (
+          <div className="flex flex-col items-center space-y-2 text-gray-500">
+            <div className="w-8 h-8 border-4 border-blue-300 border-t-blue-700 rounded-full animate-spin"></div>
+            <p className="text-sm">Memuat data pengguna...</p>
+          </div>
+        ) : (
+          <>
+            <p className="text-sm text-gray-500 mb-4">
+              Mengalihkan ke <strong>{role === "admin" || role === "member" ? `dashboard ${role}` : "beranda"}</strong> dalam 5 detik...
+            </p>
+            <button onClick={() => router.push(role === "admin" || role === "member" ? `/${role}` : `/`)} className="bg-blue-700 text-white px-5 py-2 rounded hover:bg-blue-800 transition cursor-pointer">
+              Kembali Sekarang
+            </button>
+          </>
+        )}
+      </div>
+    </>
   );
 }

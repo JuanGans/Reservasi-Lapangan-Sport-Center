@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { Facility } from "@/types/facility";
 import { useRouter } from "next/router";
 
@@ -12,21 +12,26 @@ const Carousel = ({ facilities }: { facilities: Facility[] }) => {
   const router = useRouter();
 
   const handleNext = () => {
-    setCurrentIndex((prev) => (prev + 1) % facilities.length);
+    setCurrentIndex((prev) => (prev + 1) % topFacilities.length);
   };
 
   const handlePrev = () => {
-    setCurrentIndex((prev) => (prev - 1 + facilities.length) % facilities.length);
+    setCurrentIndex((prev) => (prev - 1 + topFacilities.length) % topFacilities.length);
   };
 
   const goToSlide = (index: number) => {
     setCurrentIndex(index);
   };
 
+  // Hanya ambil 6 fasilitas terbaik berdasarkan rating
+  const topFacilities = useMemo(() => {
+    return [...facilities].sort((a, b) => (b.avg_rating ?? 0) - (a.avg_rating ?? 0)).slice(0, 6);
+  }, [facilities]);
+
   useEffect(() => {
     const interval = setInterval(() => handleNext(), 5000);
     return () => clearInterval(interval);
-  }, [facilities.length]);
+  }, [topFacilities.length]);
 
   useEffect(() => {
     async function fetchUserName() {
@@ -78,7 +83,7 @@ const Carousel = ({ facilities }: { facilities: Facility[] }) => {
         ) : (
           <>
             <div className="grid grid-flow-col auto-cols-[100%] transition-transform duration-700 ease-in-out" style={{ transform: `translateX(-${currentIndex * 100}%)` }}>
-              {facilities.map((field) => (
+              {topFacilities.map((field) => (
                 <div key={field.id} className="h-[300px] relative bg-gray-200 rounded-xl overflow-hidden cursor-pointer" onClick={() => handleFieldClick(field.id)}>
                   <img src={field.field_image ? `/assets/field/${field.field_image}` : "assets/field/fallback.jpg"} alt={field.field_name} className="absolute inset-0 w-full h-full object-cover object-center" />
 
@@ -105,7 +110,7 @@ const Carousel = ({ facilities }: { facilities: Facility[] }) => {
       {/* Dots */}
       {!isLoading && (
         <div className="flex justify-center mt-5 space-x-2">
-          {facilities.map((_, i) => (
+          {topFacilities.map((_, i) => (
             <button key={i} onClick={() => goToSlide(i)} className={`h-2.5 rounded-full transition-all duration-300 cursor-pointer ${i === currentIndex ? "bg-blue-600 w-6" : "bg-gray-400 w-2"}`}></button>
           ))}
         </div>

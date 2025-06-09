@@ -1,6 +1,6 @@
 import { BookingSession } from "./bookingSession";
 
-export type BookingStatus = "pending" | "paid" | "canceled" | "expired" | "completed";
+export type BookingStatus = "all" | "pending" | "paid" | "confirmed" | "canceled" | "expired" | "review" | "completed";
 
 // Struktur booking utama
 export type Booking = {

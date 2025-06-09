@@ -62,11 +62,13 @@ model Bookings {
 
 // ENUM BOOKING STATUS
 enum BookingStatus {
-  pending     // Belum dibayar
-  paid        // Sudah dibayar
-  canceled    // Dibatalkan oleh admin
+  pending     // Belum dibayar (Proses Booking)
+  paid        // Sudah dibayar (Masih menunggu konfirmasi oleh admin)
+  confirmed   // Booking sudah dikonfirmasi oleh admin -> Bisa dipakai
+  canceled    // Booking ditolak oleh admin 
   expired     // Kadaluarsa (tidak dibayar dalam waktu tertentu)
-  completed   // Selesai digunakan
+  review      // Booking selesai -> melakukan review
+  completed   // Booking selesai digunakan dan review
 }
 
 // MODEL BOOKING SESSION
@@ -134,7 +136,7 @@ model Notifications {
   userId     Int
   message    String
   type       NotificationType @default(info)
-  target_id  Int?             // ID objek yang dituju (Booking, Transaksi, dsb)
+  target_id  String?          // ID objek yang dituju (Booking, Transaksi, dsb)
   is_read    Boolean          @default(false)
   created_at DateTime         @default(now())
   updated_at DateTime         @updatedAt
@@ -147,7 +149,8 @@ enum NotificationType {
   payment     // notifikasi berkaitan dengan proses transaksi -> membayar
   paid        // notifikasi berkaitan dengan pembayaran telah dibayar
   confirmed   // notifikasi berkaitan dengan booking berhasil dikonfirmasi admin -> bisa dihapus
-  canceled    // notifikasi berkaitan dengan booking ditolak admin atau dibatalkan karena kadaluarsa -> bisa dihapus
+  canceled    // notifikasi berkaitan dengan booking ditolak admin -> bisa dihapus
+  expired     // notifikasi berkaitan dengan booking kadaluarsa (tidak dibayar dalam waktu tertentu)
   review      // notifikasi berkaitan dengan review
   completed   // notifikasi selesai booking -> bisa dihapus notifikasi
 }

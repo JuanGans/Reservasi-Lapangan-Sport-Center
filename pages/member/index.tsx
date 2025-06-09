@@ -7,8 +7,7 @@ import Toast from "@/components/toast/Toast";
 import { Booking } from "@/types/booking";
 import { Facility } from "@/types/facility";
 import { useUser } from "@/context/userContext";
-
-type BookingStatus = "all" | "pending" | "paid" | "canceled" | "completed" | "expired";
+import { BookingStatus } from "@/types/booking";
 
 const MemberPage: React.FC = () => {
   const [facilities, setFacilities] = useState<Facility[]>([]);
@@ -77,9 +76,11 @@ const MemberPage: React.FC = () => {
             <option value="all">Semua</option>
             <option value="pending">Menunggu Pembayaran</option>
             <option value="paid">Selesai Membayar</option>
-            <option value="canceled">Dibatalkan</option>
+            <option value="confirmed">Booking Sukses</option>
+            <option value="canceled">Booking Ditolak</option>
+            <option value="expired">Pembayaran Kadaluarsa</option>
+            <option value="review">Menunggu Review</option>
             <option value="completed">Selesai</option>
-            <option value="expired">Kadaluarsa</option>
           </select>
         </div>
 

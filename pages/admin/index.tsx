@@ -9,8 +9,7 @@ import BookingsChart from "@/components/admin/BookingsChart";
 import ResponsiveBookingView from "@/components/dashboard/ResponsiveBooking";
 import { Booking } from "@/types/booking";
 import { useUser } from "@/context/userContext";
-
-type BookingStatus = "all" | "pending" | "paid" | "canceled" | "completed" | "expired";
+import { BookingStatus } from "@/types/booking";
 
 interface ToastState {
   message: string;
@@ -29,7 +28,7 @@ const AdminDashboard = () => {
   useEffect(() => {
     const { restricted, repeat } = router.query;
     if (restricted === "1") {
-      setToast({ message: "Tidak dapat akses, anda bukan admin!", type: "error" });
+      setToast({ message: "Tidak dapat akses, anda bukan member!", type: "error" });
       router.replace(router.pathname);
     } else if (repeat === "1") {
       setToast({ message: "Logout dengan benar!", type: "error" });
@@ -91,9 +90,11 @@ const AdminDashboard = () => {
             <option value="all">Semua</option>
             <option value="pending">Menunggu Pembayaran</option>
             <option value="paid">Selesai Membayar</option>
-            <option value="canceled">Dibatalkan</option>
+            <option value="confirmed">Booking Sukses</option>
+            <option value="canceled">Booking Ditolak</option>
+            <option value="expired">Pembayaran Kadaluarsa</option>
+            <option value="review">Menunggu Review</option>
             <option value="completed">Selesai</option>
-            <option value="expired">Kadaluarsa</option>
           </select>
         </div>
 

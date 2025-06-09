@@ -11,6 +11,7 @@ type BookingListCardProps = {
 };
 
 const BookingListCard: React.FC<BookingListCardProps> = ({ bookings, filterStatus, role }) => {
+  const [index, setIndex] = useState(0);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   useEffect(() => {
     document.body.style.overflow = selectedBooking ? "hidden" : "auto";
@@ -21,12 +22,20 @@ const BookingListCard: React.FC<BookingListCardProps> = ({ bookings, filterStatu
 
   const handleDetailClick = (id: number) => {
     const booking = bookings.find((b) => b.id === id) || null;
+    setIndex(index);
     setSelectedBooking(booking);
   };
 
   const handleCloseModal = () => setSelectedBooking(null);
 
   const filteredBookings = bookings.filter((booking) => (filterStatus === "all" ? true : booking.booking_status === filterStatus));
+
+  useEffect(() => {
+    document.body.style.overflow = selectedBooking ? "hidden" : "auto";
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [selectedBooking]);
 
   return (
     <div className="mt-6 space-y-4">
@@ -39,7 +48,7 @@ const BookingListCard: React.FC<BookingListCardProps> = ({ bookings, filterStatu
       )}
 
       {/* Modal Detail */}
-      <BookingDetailModal booking={selectedBooking} onClose={handleCloseModal} />
+      <BookingDetailModal booking={selectedBooking} index={index} onClose={handleCloseModal} />
     </div>
   );
 };

@@ -63,7 +63,7 @@ export default async function seedBookings(prisma: PrismaClient) {
       userId: 2,
       facilityId: 1,
       booking_date: new Date("2025-06-07"),
-      booking_status: BookingStatus.completed,
+      booking_status: BookingStatus.review,
       total_price: 300000,
       created_at: today,
       updated_at: today,

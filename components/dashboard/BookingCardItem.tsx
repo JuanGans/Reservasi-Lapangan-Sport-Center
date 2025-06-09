@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Booking } from "@/types/booking";
+import { Booking, BookingStatus } from "@/types/booking";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
@@ -10,12 +10,14 @@ type Props = {
   onDetail: (id: number) => void;
 };
 
-const statusColor = {
-  completed: "bg-green-100 text-green-700",
-  paid: "bg-blue-100 text-blue-700",
+const statusColor: Record<Exclude<BookingStatus, "all">, string> = {
   pending: "bg-yellow-100 text-yellow-700",
+  paid: "bg-blue-100 text-blue-700",
+  confirmed: "bg-indigo-100 text-indigo-700",
   canceled: "bg-red-100 text-red-700",
-  expired: "bg-gray-100 text-gray-700",
+  expired: "bg-gray-200 text-gray-700",
+  review: "bg-purple-100 text-purple-700",
+  completed: "bg-green-100 text-green-700",
 };
 
 const BookingCardItem: React.FC<Props> = ({ booking, index, onDetail, role }) => {
@@ -47,7 +49,7 @@ const BookingCardItem: React.FC<Props> = ({ booking, index, onDetail, role }) =>
           </div>
         </div>
         <div className="flex flex-col items-end gap-1">
-          <span className={`text-xs font-semibold px-2 py-1 rounded-full ${statusColor[booking.booking_status]}`}>{booking.booking_status}</span>
+          <span className={`text-xs font-semibold px-2 py-1 rounded-full ${booking.booking_status !== "all" ? statusColor[booking.booking_status] : ""}`}>{booking.booking_status}</span>
           <button
             className="flex items-center text-xs text-blue-600 font-medium hover:text-blue-800 transition gap-1 mt-1 cursor-pointer"
             onClick={(e) => {

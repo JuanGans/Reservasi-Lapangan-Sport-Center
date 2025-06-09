@@ -16,9 +16,10 @@ const modalVariants = {
 type Props = {
   booking: Booking | null;
   onClose: () => void;
+  index: number;
 };
 
-const BookingDetailModal: React.FC<Props> = ({ booking, onClose }) => {
+const BookingDetailModal: React.FC<Props> = ({ booking, onClose, index }) => {
   const [timeLeft, setTimeLeft] = useState<string>("");
 
   useEffect(() => {
@@ -47,98 +48,119 @@ const BookingDetailModal: React.FC<Props> = ({ booking, onClose }) => {
 
   if (!booking) return null;
 
+  const renderPendingInfo = () => (
+    <>
+      <div className="bg-yellow-50 p-4 rounded-xl border border-yellow-300 mt-6 space-y-1">
+        <p className="text-yellow-800 font-semibold text-sm">Tenggat Pembayaran:</p>
+        <p className="text-yellow-700">{timeLeft}</p>
+      </div>
+
+      <div className="mt-4 bg-gray-50 p-4 rounded-xl border flex items-center gap-4">
+        <img src="/bank-bca-logo.png" alt="BCA" className="w-12 h-12 object-contain" />
+        <div>
+          <p className="text-sm text-gray-800">
+            Transfer ke: <strong>1234567890</strong>
+          </p>
+          <p className="text-xs text-gray-500">a.n. PT Lapangan Sport</p>
+        </div>
+      </div>
+    </>
+  );
+
+  const renderFooterButton = () => {
+    switch (booking.booking_status) {
+      case "pending":
+        return (
+          <button onClick={() => alert("Lanjut ke pembayaran")} className="px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition w-full sm:w-auto cursor-pointer">
+            Lanjut ke Pembayaran
+          </button>
+        );
+      case "paid":
+        return (
+          <button onClick={() => alert("Hubungi admin untuk pembatalan")} className="px-5 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl transition w-full sm:w-auto cursor-pointer">
+            Batal Booking
+          </button>
+        );
+      case "review":
+        return (
+          <button onClick={() => alert("Arahkan ke halaman ulasan")} className="px-5 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-xl transition w-full sm:w-auto cursor-pointer">
+            Beri Ulasan
+          </button>
+        );
+      default:
+        return null;
+    }
+  };
+
   return (
     <AnimatePresence>
       <motion.div className="fixed inset-0 bg-black/70 flex justify-center items-center z-50 p-4" variants={backdropVariants} initial="hidden" animate="visible" exit="hidden" onClick={onClose}>
         <motion.div
-          className="bg-white rounded-xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6 sm:p-8 relative text-blue-900"
+          className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 sm:p-10 relative text-blue-900 border border-gray-100"
           variants={modalVariants}
           initial="hidden"
           animate="visible"
           exit="exit"
           onClick={(e) => e.stopPropagation()}
         >
-          <h3 className="text-2xl font-bold mb-4 border-b pb-3">Detail Booking #{booking.id}</h3>
+          <h3 className="text-2xl font-bold mb-6 border-b pb-4 text-center text-blue-800">Detail Booking #{index + 1}</h3>
 
-          {/* Foto Lapangan */}
-          {booking.facility?.field_image && <img src={`/assets/field/${booking.facility?.field_image}`} alt="Lapangan" className="w-full h-48 object-cover rounded-md mb-4" />}
+          {booking.facility?.field_image && <img src={`/assets/field/${booking.facility?.field_image}`} alt="Lapangan" className="w-full h-56 object-cover rounded-xl mb-6 shadow-sm" />}
 
-          <div className="space-y-3 text-sm sm:text-base">
-            <div>
-              <strong>Fasilitas:</strong> {booking.facility?.field_name || "-"}
-            </div>
-            <div>
-              <strong>Status:</strong> <span className={`font-medium ${booking.booking_status === "completed" ? "text-green-600" : booking.booking_status === "pending" ? "text-yellow-600" : "text-red-600"}`}>{booking.booking_status}</span>
-            </div>
-            <div>
-              <strong>Tanggal:</strong>{" "}
-              {new Date(booking.booking_date).toLocaleDateString("id-ID", {
+          <div className="grid gap-4 text-sm sm:text-base">
+            <DetailItem label="Fasilitas" value={booking.facility?.field_name || "-"} />
+            <DetailItem label="Status" value={booking.booking_status} status />
+            <DetailItem
+              label="Tanggal"
+              value={new Date(booking.booking_date).toLocaleDateString("id-ID", {
                 weekday: "long",
                 day: "numeric",
                 month: "long",
                 year: "numeric",
               })}
-            </div>
-            <div>
-              <strong>Sesi:</strong> {booking.sessions?.map((s) => s.session_label).join(", ") || "-"}
-            </div>
-            <div>
-              <strong>Total Bayar:</strong> <span className="font-semibold text-blue-700">Rp {booking.total_price.toLocaleString("id-ID")}</span>
-            </div>
-
-            {/* Tenggat waktu realtime */}
-            {booking.booking_status === "pending" && (
-              <div className="bg-yellow-50 p-3 rounded-md border border-yellow-300 mt-4">
-                <p className="text-yellow-800 font-semibold">Tenggat Pembayaran:</p>
-                <p className="text-yellow-700">{timeLeft}</p>
-              </div>
-            )}
-
-            {/* Opsi pembayaran */}
-            {booking.booking_status === "pending" && (
-              <div className="mt-4 bg-gray-50 p-4 rounded-md border">
-                <p className="font-medium text-blue-700 mb-1">Metode Pembayaran:</p>
-                <div className="flex items-center gap-3">
-                  <img src="/bank-bca-logo.png" alt="BCA" className="w-10 h-10 object-contain" />
-                  <div>
-                    <p className="text-sm text-gray-800">
-                      Transfer ke: <strong>1234567890</strong>
-                    </p>
-                    <p className="text-xs text-gray-500">a.n. PT Lapangan Sport</p>
-                  </div>
-                </div>
-              </div>
-            )}
+            />
+            <DetailItem label="Sesi" value={booking.sessions?.map((s) => s.session_label).join(", ") || "-"} />
+            <DetailItem label="Total Bayar" value={`Rp ${booking.total_price.toLocaleString("id-ID")}`} highlight />
           </div>
 
-          {/* Tombol aksi */}
-          <div className="mt-8 flex flex-col sm:flex-row gap-3">
-            <button onClick={onClose} className="w-full sm:w-auto px-5 py-3 border border-gray-300 hover:bg-gray-100 rounded-md transition text-gray-700 font-medium cursor-pointer">
+          {booking.booking_status === "pending" && renderPendingInfo()}
+
+          <div className="mt-8 flex flex-col sm:flex-row justify-end gap-3">
+            <button onClick={onClose} className="px-5 py-3 border border-gray-300 hover:bg-gray-100 rounded-xl transition text-gray-700 font-medium w-full sm:w-auto cursor-pointer">
               Tutup
             </button>
-
-            {booking.booking_status === "pending" && (
-              <button onClick={() => alert("Lanjut ke pembayaran")} className="w-full sm:w-auto px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md transition cursor-pointer">
-                Lanjut ke Pembayaran
-              </button>
-            )}
-
-            {booking.booking_status === "paid" && (
-              <button onClick={() => alert("Hubungi admin untuk pembatalan")} className="w-full sm:w-auto px-5 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-md transition cursor-pointer">
-                Batal Booking
-              </button>
-            )}
-
-            {booking.booking_status === "completed" && (
-              <button onClick={() => alert("Arahkan ke halaman ulasan")} className="w-full sm:w-auto px-5 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-md transition cursor-pointer">
-                Beri Ulasan
-              </button>
-            )}
+            {renderFooterButton()}
           </div>
         </motion.div>
       </motion.div>
     </AnimatePresence>
   );
+};
+
+const DetailItem = ({ label, value, status = false, highlight = false }: { label: string; value: string; status?: boolean; highlight?: boolean }) => (
+  <div className="flex justify-between items-start gap-4">
+    <span className="font-medium text-gray-600">{label}</span>
+    <span className={`text-right ${status ? getStatusColor(value) : ""} ${status ? "font-semibold px-2 py-1 rounded-full" : ""} ${highlight ? "text-blue-700 font-bold" : "text-gray-800"}`}>{value}</span>
+  </div>
+);
+
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case "pending":
+      return "bg-yellow-100 text-yellow-700";
+    case "paid":
+      return "bg-blue-100 text-blue-700";
+    case "confirmed":
+      return "bg-indigo-100 text-indigo-700";
+    case "canceled":
+      return "bg-red-100 text-red-700";
+    case "expired":
+      return "bg-gray-200 text-gray-700";
+    case "review":
+      return "bg-purple-100 text-purple-700";
+    default:
+      return "bg-green-100 text-green-700";
+  }
 };
 
 export default BookingDetailModal;
