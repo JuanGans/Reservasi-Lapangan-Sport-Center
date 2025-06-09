@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { PrismaClient } from "@prisma/client";
-import { getUserFromToken } from "@/lib/getUserFromToken"; // path disesuaikan
 const prisma = new PrismaClient();
+import { getUserFromToken } from "@/lib/getUserFromToken"; // path disesuaikan
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") {
@@ -49,9 +49,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     await prisma.notifications.create({
       data: {
         userId,
-        message: `Booking lapangan ${booking.facility.field_name} berhasil dibuat.`,
+        message: `Booking lapangan ${booking.facility.field_name} berhasil dibuat, silahkan lanjutkan ke pembayaran.`,
         type: "booking",
-        target_id: 1,
       },
     });
 

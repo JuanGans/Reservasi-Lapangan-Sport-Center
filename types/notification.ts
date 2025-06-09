@@ -5,7 +5,6 @@ export interface Notification {
   userId: number;
   message: string;
   type: NotificationType;
-  target_id: number | null;
   is_read: boolean;
   created_at: string;
   updated_at: string;

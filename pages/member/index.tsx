@@ -18,12 +18,15 @@ const MemberPage: React.FC = () => {
   const router = useRouter();
 
   useEffect(() => {
-    const { restricted, repeat } = router.query;
+    const { restricted, repeat, notBooking } = router.query;
     if (restricted === "1") {
       setToast({ message: "Tidak dapat akses, anda bukan admin!", type: "error" });
       router.replace(router.pathname); // Bersihkan query
     } else if (repeat === "1") {
       setToast({ message: "Logout dengan benar!", type: "error" });
+      router.replace(router.pathname); // Bersihkan query
+    } else if (notBooking === "1") {
+      setToast({ message: "Anda melakukan tindakan ilegal!", type: "error" });
       router.replace(router.pathname); // Bersihkan query
     }
   }, [router]);

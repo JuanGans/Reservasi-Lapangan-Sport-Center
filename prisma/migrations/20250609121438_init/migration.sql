@@ -57,7 +57,7 @@ CREATE TABLE `BookingSessions` (
 CREATE TABLE `Transactions` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `bookingId` INTEGER NOT NULL,
-    `amount` INTEGER NOT NULL,
+    `amount` INTEGER NULL,
     `status` ENUM('pending', 'paid', 'failed', 'expired', 'refunded') NOT NULL DEFAULT 'pending',
     `payment_method` ENUM('Cash', 'Ovo', 'Dana', 'Gopay', 'LinkAja', 'Shopeepay', 'BNI', 'BCA', 'BRI', 'Mandiri') NOT NULL DEFAULT 'Cash',
     `payment_proof` VARCHAR(1000) NULL,
@@ -88,7 +88,6 @@ CREATE TABLE `Notifications` (
     `userId` INTEGER NOT NULL,
     `message` VARCHAR(191) NOT NULL,
     `type` ENUM('info', 'booking', 'payment', 'paid', 'confirmed', 'canceled', 'expired', 'review', 'completed') NOT NULL DEFAULT 'info',
-    `target_id` VARCHAR(191) NULL,
     `is_read` BOOLEAN NOT NULL DEFAULT false,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` DATETIME(3) NOT NULL,

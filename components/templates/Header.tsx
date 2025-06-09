@@ -91,7 +91,7 @@ const Header: React.FC = () => {
           message: notif.message,
           type: "booking",
           actionLabel: "Lanjutkan ke Booking",
-          onAction: () => router.push(`/member/booking/${user?.id}`),
+          onAction: () => router.push(`/member/booking/detail`),
         });
         break;
 
@@ -100,7 +100,7 @@ const Header: React.FC = () => {
           message: notif.message,
           type: "payment",
           actionLabel: "Lanjutkan ke Pembayaran",
-          onAction: () => router.push(`/member/booking/${user?.id}`),
+          onAction: () => router.push(`/member/booking/payment`),
         });
         break;
 

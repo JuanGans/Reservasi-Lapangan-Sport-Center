@@ -85,7 +85,7 @@ model Transactions {
   id              Int               @id @default(autoincrement())
   booking         Bookings          @relation(fields: [bookingId], references: [id])
   bookingId       Int               @unique
-  amount          Int
+  amount          Int?
   status          TransactionStatus @default(pending)
   payment_method  PaymentMethod     @default(Cash)
   payment_proof   String?           @db.VarChar(1000)
@@ -136,7 +136,6 @@ model Notifications {
   userId     Int
   message    String
   type       NotificationType @default(info)
-  target_id  String?          // ID objek yang dituju (Booking, Transaksi, dsb)
   is_read    Boolean          @default(false)
   created_at DateTime         @default(now())
   updated_at DateTime         @updatedAt

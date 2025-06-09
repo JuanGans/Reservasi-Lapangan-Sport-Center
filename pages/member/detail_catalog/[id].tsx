@@ -186,7 +186,8 @@ const DetailCatalogPage: React.FC = () => {
       const data = await res.json();
       if (data.error) throw new Error(data.error);
 
-      router.push(`/member/booking`);
+      localStorage.setItem("latestBookingId", data.booking.id);
+      router.push(`/member/booking/detail`);
     } catch (err) {
       console.error("Booking gagal:", err);
       setToast({ message: "Gagal melakukan booking", type: "error" });

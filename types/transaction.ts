@@ -8,7 +8,7 @@ export type TransactionStatus = "pending" | "paid" | "failed" | "expired" | "ref
 export type Transaction = {
   id: number;
   bookingId: number;
-  amount: number;
+  amount?: number;
   status: TransactionStatus;
   payment_method: PaymentMethod;
   payment_proof?: string | null;

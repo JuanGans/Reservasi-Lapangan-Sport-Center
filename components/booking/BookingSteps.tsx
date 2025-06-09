@@ -6,7 +6,6 @@ import StepPembayaran from "@/components/booking/steps/StepPembayaran";
 import StepSelesai from "@/components/booking/steps/StepSelesai";
 import ConfirmModal from "@/components/booking/steps/ConfirmModal";
 import PaymentModal from "@/components/booking/steps/PaymentModal";
-import { useUser } from "@/context/userContext";
 import DashboardLayout from "@/layout/DashboardLayout";
 import Toast from "@/components/toast/Toast";
 import { AnimatePresence, motion } from "framer-motion";
@@ -28,7 +27,6 @@ const stepSlugMap: Record<string, number> = {
 };
 
 const BookingSteps = () => {
-  const { user } = useUser();
   const router = useRouter();
   const stepParam = router.query.step as string[] | undefined;
   const stepSlug = stepParam?.[0] ?? "";
@@ -39,60 +37,92 @@ const BookingSteps = () => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [countdown, setCountdown] = useState(15 * 60);
-  const [timerActive, setTimerActive] = useState(false);
+  // const [timerActive, setTimerActive] = useState(false);
+
+  const [bookingData, setBookingData] = useState<Booking | null>(null);
+  const [latestBookingId, setLatestBookingId] = useState<number | null>(null);
+  const [transactionId, setTransactionId] = useState<number | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const transId = localStorage.getItem("latestTransactionId");
+    if (transId) {
+      const id = parseInt(transId);
+      setTransactionId(id);
+      fetchTransaction(id);
+    }
+  }, []);
+
+  const fetchTransaction = async (id: number) => {
+    try {
+      const res = await fetch(`/api/transactions/getTransactionById/${id}`);
+      const data = await res.json();
+      if (!res.ok) throw new Error("Gagal mengambil data transaksi");
+
+      // Simpan metode pembayaran dari transaksi
+      setSelectedMethod({
+        name: data.transaction.payment_method,
+        icon: `${data.transaction.payment_method.toLowerCase()}.png`, // atau mapping sendiri
+      });
+    } catch (err) {
+      console.error("Gagal fetch transaction:", err);
+    }
+  };
+
+  useEffect(() => {
+    const storedId = localStorage.getItem("latestBookingId");
+    if (!storedId) {
+      router.replace("/member?notBooking=1");
+      return;
+    }
+
+    const id = parseInt(storedId);
+    setLatestBookingId(id);
+
+    const fetchBooking = async () => {
+      try {
+        const res = await fetch(`/api/bookings/getBookingById/${id}`);
+        const data = await res.json();
+
+        if (!res.ok) throw new Error("Failed to fetch booking");
+        setBookingData(data.booking);
+      } catch (err) {
+        console.error("Error fetching booking:", err);
+        router.replace("/member?notBooking=1");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBooking();
+  }, []);
 
   const showToast = (message: string, type: "success" | "error" | "info") => {
     setToast({ message, type });
   };
-
-  // useEffect(() => {
-  //   if (!stepSlug) {
-  //     router.replace("/member/booking/detail");
-  //   }
-  // }, [stepSlug, router]);
 
   const goToStep = (step: number) => {
     const path = `/member/booking/${stepPaths[step]}`;
     router.push(path);
   };
 
-  // Dummy data sementara
-  const [bookingData, setBookingData] = useState<Booking>({
-    id: 10,
-    booking_date: "2025-07-10",
-    booking_status: "pending",
-    total_price: 300000,
-    created_at: new Date().toISOString(),
-    expired_at: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
-    facility: {
-      id: 1,
-      field_name: "Lapangan Futsal A",
-      field_image: "futsal_1.jpg",
-    },
-    sessions: [
-      { id: 1, session_label: "07:00 - 08:00", start_time: "07:00", end_time: "08:00" },
-      { id: 2, session_label: "08:00 - 09:00", start_time: "08:00", end_time: "09:00" },
-    ],
-  });
+  // useEffect(() => {
+  //   let timer: NodeJS.Timeout | null = null;
 
-  // Countdown logic
-  useEffect(() => {
-    let timer: NodeJS.Timeout | null = null;
+  //   if (timerActive && countdown > 0) {
+  //     timer = setInterval(() => setCountdown((c) => c - 1), 1000);
+  //   } else if (countdown === 0) {
+  //     setTimerActive(false);
+  //     alert("Waktu pembayaran habis, silakan ulangi proses booking.");
+  //     goToStep(0);
+  //     setSelectedMethod(null);
+  //     setCountdown(15 * 60);
+  //   }
 
-    if (timerActive && countdown > 0) {
-      timer = setInterval(() => setCountdown((c) => c - 1), 1000);
-    } else if (countdown === 0) {
-      setTimerActive(false);
-      alert("Waktu pembayaran habis, silakan ulangi proses booking.");
-      goToStep(0);
-      setSelectedMethod(null);
-      setCountdown(15 * 60);
-    }
-
-    return () => {
-      if (timer) clearInterval(timer);
-    };
-  }, [timerActive, countdown]);
+  //   return () => {
+  //     if (timer) clearInterval(timer);
+  //   };
+  // }, [timerActive, countdown]);
 
   const handleNext = () => {
     if (currentStep === 1 && !selectedMethod) {
@@ -107,42 +137,123 @@ const BookingSteps = () => {
     }
   };
 
-  const handleConfirmPaymentMethod = () => {
-    setShowConfirmModal(false);
-    goToStep(2);
-    setTimerActive(true);
+  const handleConfirmPaymentMethod = async () => {
+    try {
+      if (!latestBookingId || !selectedMethod) {
+        setToast({ message: "Data booking atau metode pembayaran tidak valid", type: "error" });
+        return;
+      }
+
+      setShowConfirmModal(false);
+
+      const res = await fetch("/api/transactions/addTransaction", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          bookingId: latestBookingId,
+          amount: bookingData?.total_price,
+          payment_method: selectedMethod.name, // enum sesuai backend
+        }),
+      });
+
+      if (!res.ok) throw new Error("Gagal membuat transaksi");
+
+      const data = await res.json();
+      localStorage.setItem("latestTransactionId", data.transaction.id);
+      // console.log("Transaksi berhasil:", data);
+
+      goToStep(2);
+      // setTimerActive(true);
+    } catch (err) {
+      console.error("Gagal konfirmasi metode pembayaran:", err);
+      setToast({ message: "Gagal memproses transaksi", type: "error" });
+    }
   };
 
   const handleOpenPaymentModal = () => {
     setShowPaymentModal(true);
   };
 
-  const handleSubmitPayment = (file: File | null) => {
-    setShowPaymentModal(false);
-    setToast({ message: "Bukti pembayaran terkirim, menunggu konfirmasi admin.", type: "success" });
-    goToStep(3);
-    setTimerActive(false);
+  // HANDLE SUBMIT PAYMENT PROOF
+  const handleSubmitPayment = async (file: File | null) => {
+    if (!file || !transactionId) {
+      setToast({ message: "Bukti pembayaran tidak valid", type: "error" });
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append("transactionId", transactionId.toString());
+      formData.append("amount", bookingData?.total_price?.toString() || "0");
+      // formData.append("notificationId", notificationId.toString());
+      formData.append("paymentProof", file);
+
+      const res = await fetch("/api/transactions/addPaymentProof", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Gagal mengunggah bukti");
+
+      setTransactionId(null);
+      setToast({ message: data.message, type: "success" });
+      goToStep(3);
+      // setTimerActive(false);
+    } catch (error) {
+      console.error("Gagal kirim bukti:", error);
+      setToast({ message: "Gagal mengirim bukti pembayaran", type: "error" });
+    } finally {
+      setShowPaymentModal(false);
+    }
   };
+
+  // HARUS SELESAIKAN TRANSAKSI
+  useEffect(() => {
+    const rawSlug = router.query.step?.[0];
+    if (rawSlug !== "payment" && transactionId) {
+      showToast("Dimohon selesaikan pembayaran dengan benar!", "error");
+      router.replace("/member/booking/payment");
+      return;
+    }
+  }, [router.query.step, transactionId]);
+
+  useEffect(() => {
+    if (currentStep === 3) {
+      localStorage.removeItem("latestBookingId");
+      localStorage.removeItem("latestTransactionId");
+    }
+  }, [currentStep]);
 
   const stepContent = useMemo(() => {
     switch (currentStep) {
       case 0:
-        return <StepDetailBooking user={user} booking={bookingData} />;
+        return <StepDetailBooking user={bookingData?.user} booking={bookingData!} />;
       case 1:
         return <StepMetodePembayaran selectedMethod={selectedMethod} onSelectMethod={setSelectedMethod} />;
       case 2:
-        return <StepPembayaran selectedMethod={selectedMethod} countdown={countdown} booking={bookingData} showToast={showToast} />;
+        return <StepPembayaran selectedMethod={selectedMethod} countdown={countdown} booking={bookingData!} showToast={showToast} />;
       case 3:
         return <StepSelesai />;
       default:
         return null;
     }
-  }, [currentStep, user, bookingData, selectedMethod, countdown]);
+  }, [currentStep, bookingData, selectedMethod, countdown]);
+
+  if (loading || !bookingData) {
+    return (
+      <DashboardLayout title="Booking">
+        <div className="text-center py-20 text-blue-900">Memuat data booking...</div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <>
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
-      <DashboardLayout title="Booking">
+      <DashboardLayout title={`Booking ${bookingData.facility?.field_name}`}>
         <div className="max-w-3xl mx-auto p-4 mt-6 relative">
           <StepIndicator steps={steps} currentStep={currentStep} />
           <AnimatePresence mode="wait">
@@ -159,21 +270,21 @@ const BookingSteps = () => {
             </motion.div>
           </AnimatePresence>
 
-          <div className={`flex justify-center mt-8`}>
+          <div className="flex justify-center mt-8">
             {currentStep > 0 && currentStep < 2 && (
-              <button onClick={() => goToStep(currentStep - 1)} className="px-4 py-2 rounded border border-gray-300 hover:bg-gray-300 bg-gray-500 transition duration-300 cursor-pointer mr-3">
+              <button onClick={() => goToStep(currentStep - 1)} className="px-4 py-2 rounded border border-gray-300 hover:bg-gray-300 bg-gray-500 text-white transition duration-300 cursor-pointer mr-3">
                 &lt;&lt; Kembali
               </button>
             )}
 
             {currentStep < 2 && (
               <button onClick={handleNext} className="px-6 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 transition duration-300 disabled:bg-blue-300 disabled:cursor-not-allowed cursor-pointer">
-                &gt;&gt; {currentStep === 2 ? "Selesai" : "Lanjutkan"}
+                &gt;&gt; Lanjutkan
               </button>
             )}
 
             {currentStep === 2 && (
-              <button onClick={handleOpenPaymentModal} className="px-6 py-2 rounded bg-green-600 text-white hover:bg-green-700 cursor-pointer transition duration-300">
+              <button onClick={handleOpenPaymentModal} className="px-6 py-2 rounded bg-green-600 text-white hover:bg-green-700 transition duration-300 cursor-pointer">
                 Upload Bukti
               </button>
             )}

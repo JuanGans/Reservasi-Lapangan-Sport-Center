@@ -11,8 +11,10 @@ export type Booking = {
   created_at: string;
   expired_at: string;
   user?: {
-    email: string;
+    id: number;
     username: string;
+    fullname: string;
+    email: string;
     no_hp: string;
     user_img: string;
     role: string;
