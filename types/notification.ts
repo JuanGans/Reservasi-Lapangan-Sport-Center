@@ -3,6 +3,8 @@ export type NotificationType = "info" | "booking" | "payment" | "paid" | "confir
 export interface Notification {
   id: number;
   userId: number;
+  bookingId: number;
+  transactionId: number;
   message: string;
   type: NotificationType;
   is_read: boolean;

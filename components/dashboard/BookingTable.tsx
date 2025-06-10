@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Booking } from "@/types/booking";
 import BookingDetailModal from "../booking/PopupBookingDetail";
 import { BookingStatus } from "@/types/booking"; // pastikan import ini sesuai lokasi aslinya
+import { AnimatePresence } from "framer-motion";
 
 type BookingTableProps = {
   bookings: Booking[];
@@ -109,7 +110,7 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings, filterStatus, rol
         </table>
 
         {/* Modal Detail */}
-        <BookingDetailModal booking={selectedBooking} index={index} onClose={handleCloseModal} />
+        <AnimatePresence mode="wait">{selectedBooking && <BookingDetailModal key={index} booking={selectedBooking} index={index} onClose={handleCloseModal} />}</AnimatePresence>
       </div>
     </div>
   );

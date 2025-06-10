@@ -51,6 +51,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         userId,
         message: `Booking lapangan ${booking.facility.field_name} berhasil dibuat, silahkan lanjutkan ke pembayaran.`,
         type: "booking",
+        bookingId: booking.id,
       },
     });
 

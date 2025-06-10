@@ -27,23 +27,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       },
     });
 
-    const notification = await prisma.notifications.findFirst({
-      where: {
-        userId: user.id,
-        type: "booking",
+    await prisma.notifications.update({
+      where: { bookingId: bookingId },
+      data: {
+        message: `Segera lakukan pembayaran sebelum 15 menit habis.`,
+        type: "payment",
+        is_read: false,
+        transactionId: transaction.id,
       },
     });
-
-    if (notification) {
-      await prisma.notifications.update({
-        where: { id: notification.id },
-        data: {
-          type: "payment",
-          is_read: false,
-          message: "Segera lakukan pembayaran sebelum 15 menit habis.",
-        },
-      });
-    }
 
     return res.status(200).json({ message: "Transaksi berhasil dibuat", transaction });
   } catch (error) {

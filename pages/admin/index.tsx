@@ -8,7 +8,7 @@ import TopUsers from "@/components/admin/TopUsers";
 import BookingsChart from "@/components/admin/BookingsChart";
 import ResponsiveBookingView from "@/components/dashboard/ResponsiveBooking";
 import { Booking } from "@/types/booking";
-import { useUser } from "@/context/userContext";
+import { useUser } from "@/context/UserContext";
 import { BookingStatus } from "@/types/booking";
 
 interface ToastState {

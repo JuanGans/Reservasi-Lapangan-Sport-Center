@@ -8,7 +8,7 @@ import UpdatePasswordModal from "@/components/profiles/modal/UpdatePasswordModal
 import DeleteAccountModal from "@/components/profiles/modal/DeleteAccountModal";
 import DashboardLayout from "@/layout/DashboardLayout";
 import Toast from "@/components/toast/Toast";
-import { useUser } from "@/context/userContext";
+import { useUser } from "@/context/UserContext";
 import { User } from "@/types/user";
 
 const Profile: React.FC = () => {
@@ -18,7 +18,13 @@ const Profile: React.FC = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isPersonalInfoModalOpen, setIsPersonalInfoModalOpen] = useState(false);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
-  const { setUser } = useUser();
+
+  const userContext = useUser();
+  if (!userContext) {
+    return null;
+  }
+
+  const { setUser, refreshUser } = userContext;
 
   // Fetch profile data
   const fetchUserData = async () => {
@@ -56,13 +62,13 @@ const Profile: React.FC = () => {
       return;
     }
 
-    // UBAH PROFILE DATA
+    // Optimistic UI update (opsional)
     setProfileData(data);
 
-    // MEMASUKKAN DATA USER KE USER CONTEXT
-    setUser(data);
+    // Panggil refresh agar Header ikut update
+    setUser(data); // Cepat tampil
+    await refreshUser(); // Sinkron backend
 
-    // TOAST
     setToast({ message: "Profil berhasil diperbarui", type: "success" });
   };
 

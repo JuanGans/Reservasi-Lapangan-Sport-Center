@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Booking } from "@/types/booking";
 import BookingCardItem from "./BookingCardItem";
 import BookingDetailModal from "../booking/PopupBookingDetail";
+import { AnimatePresence } from "framer-motion";
 
 type BookingListCardProps = {
   bookings: Booking[];
@@ -48,7 +49,7 @@ const BookingListCard: React.FC<BookingListCardProps> = ({ bookings, filterStatu
       )}
 
       {/* Modal Detail */}
-      <BookingDetailModal booking={selectedBooking} index={index} onClose={handleCloseModal} />
+      <AnimatePresence mode="wait">{selectedBooking && <BookingDetailModal key={index} booking={selectedBooking} index={index} onClose={handleCloseModal} />}</AnimatePresence>
     </div>
   );
 };

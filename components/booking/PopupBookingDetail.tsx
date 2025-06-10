@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { Booking } from "@/types/booking";
 
 const backdropVariants = {
@@ -93,47 +93,45 @@ const BookingDetailModal: React.FC<Props> = ({ booking, onClose, index }) => {
   };
 
   return (
-    <AnimatePresence>
-      <motion.div className="fixed inset-0 bg-black/70 flex justify-center items-center z-50 p-4" variants={backdropVariants} initial="hidden" animate="visible" exit="hidden" onClick={onClose}>
-        <motion.div
-          className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 sm:p-10 relative text-blue-900 border border-gray-100"
-          variants={modalVariants}
-          initial="hidden"
-          animate="visible"
-          exit="exit"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <h3 className="text-2xl font-bold mb-6 border-b pb-4 text-center text-blue-800">Detail Booking #{index + 1}</h3>
+    <motion.div className="fixed inset-0 bg-black/70 flex justify-center items-center z-50 p-4" variants={backdropVariants} initial="hidden" animate="visible" exit="hidden" onClick={onClose}>
+      <motion.div
+        className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 sm:p-10 relative text-blue-900 border border-gray-100"
+        variants={modalVariants}
+        initial="hidden"
+        animate="visible"
+        exit="exit"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h3 className="text-2xl font-bold mb-6 border-b pb-4 text-center text-blue-800">Detail Booking #{index + 1}</h3>
 
-          {booking.facility?.field_image && <img src={`/assets/field/${booking.facility?.field_image}`} alt="Lapangan" className="w-full h-56 object-cover rounded-xl mb-6 shadow-sm" />}
+        {booking.facility?.field_image && <img src={`/assets/field/${booking.facility?.field_image}`} alt="Lapangan" className="w-full h-56 object-cover rounded-xl mb-6 shadow-sm" />}
 
-          <div className="grid gap-4 text-sm sm:text-base">
-            <DetailItem label="Fasilitas" value={booking.facility?.field_name || "-"} />
-            <DetailItem label="Status" value={booking.booking_status} status />
-            <DetailItem
-              label="Tanggal"
-              value={new Date(booking.booking_date).toLocaleDateString("id-ID", {
-                weekday: "long",
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-              })}
-            />
-            <DetailItem label="Sesi" value={booking.sessions?.map((s) => s.session_label).join(", ") || "-"} />
-            <DetailItem label="Total Bayar" value={`Rp ${booking.total_price.toLocaleString("id-ID")}`} highlight />
-          </div>
+        <div className="grid gap-4 text-sm sm:text-base">
+          <DetailItem label="Fasilitas" value={booking.facility?.field_name || "-"} />
+          <DetailItem label="Status" value={booking.booking_status} status />
+          <DetailItem
+            label="Tanggal"
+            value={new Date(booking.booking_date).toLocaleDateString("id-ID", {
+              weekday: "long",
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+            })}
+          />
+          <DetailItem label="Sesi" value={booking.sessions?.map((s) => s.session_label).join(", ") || "-"} />
+          <DetailItem label="Total Bayar" value={`Rp ${booking.total_price.toLocaleString("id-ID")}`} highlight />
+        </div>
 
-          {booking.booking_status === "pending" && renderPendingInfo()}
+        {booking.booking_status === "pending" && renderPendingInfo()}
 
-          <div className="mt-8 flex flex-col sm:flex-row justify-end gap-3">
-            <button onClick={onClose} className="px-5 py-3 border border-gray-300 hover:bg-gray-100 rounded-xl transition text-gray-700 font-medium w-full sm:w-auto cursor-pointer">
-              Tutup
-            </button>
-            {renderFooterButton()}
-          </div>
-        </motion.div>
+        <div className="mt-8 flex flex-col sm:flex-row justify-end gap-3">
+          <button onClick={onClose} className="px-5 py-3 border border-gray-300 hover:bg-gray-100 rounded-xl transition text-gray-700 font-medium w-full sm:w-auto cursor-pointer">
+            Tutup
+          </button>
+          {renderFooterButton()}
+        </div>
       </motion.div>
-    </AnimatePresence>
+    </motion.div>
   );
 };
 

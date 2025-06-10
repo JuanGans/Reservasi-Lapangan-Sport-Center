@@ -42,8 +42,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       if (!user) return res.status(401).json({ message: "Token tidak valid" });
 
       const transactionId = parseInt(Array.isArray(fields.transactionId) ? fields.transactionId[0] : fields.transactionId || "");
-      const amount = parseInt(Array.isArray(fields.amount) ? fields.amount[0] : fields.amount || "");
-      const notificationId = parseInt(Array.isArray(fields.notificationId) ? fields.notificationId[0] : fields.notificationId || "");
+      // const amount = parseInt(Array.isArray(fields.amount) ? fields.amount[0] : fields.amount || "");
       const file = Array.isArray(files.paymentProof) ? files.paymentProof[0] : files.paymentProof;
 
       if (!transactionId || !file) {
@@ -58,7 +57,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const updatedTransaction = await prisma.transactions.update({
         where: { id: transactionId },
         data: {
-          amount,
+          // amount,
           payment_proof: filename,
           payment_time: new Date(),
           status: "paid",
@@ -68,7 +67,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         },
       });
 
-      // Update Status Booking
+      // Update Status Dari Booking
       if (updatedTransaction.booking) {
         await prisma.bookings.update({
           where: { id: updatedTransaction.booking.id },
@@ -78,7 +77,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       // ✅ Update specific notification by ID
       await prisma.notifications.update({
-        where: { id: notificationId },
+        where: { transactionId: transactionId },
         data: {
           message: "Pembayaran berhasil. Booking Anda sedang diverifikasi oleh Admin. Mohon ditunggu!",
           type: "paid",

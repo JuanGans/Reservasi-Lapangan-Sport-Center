@@ -55,6 +55,8 @@ export default async function seedNotifications(prisma: PrismaClient) {
     },
     {
       userId: 2,
+      bookingId: 7,
+      transactionId: 7,
       message: "Terima Kasih telah menggunakan layanan booking kami! Silahkan review lapangan kami!",
       type: NotificationType.review,
       is_read: false,
@@ -63,6 +65,8 @@ export default async function seedNotifications(prisma: PrismaClient) {
     },
     {
       userId: 2,
+      bookingId: 8,
+      transactionId: 8,
       message: "Pembayaran berhasil. Booking Anda sedang diverifikasi oleh Admin. Mohon ditunggu!",
       type: NotificationType.paid,
       is_read: false,
@@ -71,6 +75,8 @@ export default async function seedNotifications(prisma: PrismaClient) {
     },
     {
       userId: 3,
+      bookingId: 9,
+      transactionId: 9,
       message: "Pembayaran berhasil. Booking Anda sedang diverifikasi oleh Admin. Mohon ditunggu!",
       type: NotificationType.paid,
       is_read: false,

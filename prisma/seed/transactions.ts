@@ -81,7 +81,7 @@ export default async function seedTransactions(prisma: PrismaClient) {
       amount: 140000,
       status: TransactionStatus.paid,
       payment_method: PaymentMethod.BRI,
-      payment_proof: "BRI.png",
+      payment_proof: "BRI2.png",
       payment_time: today,
       created_at: today,
       updated_at: today,

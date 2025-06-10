@@ -6,7 +6,7 @@ import { useRouter } from "next/router";
 import Toast from "@/components/toast/Toast";
 import { Booking } from "@/types/booking";
 import { Facility } from "@/types/facility";
-import { useUser } from "@/context/userContext";
+import { useUser } from "@/context/UserContext";
 import { BookingStatus } from "@/types/booking";
 
 const MemberPage: React.FC = () => {

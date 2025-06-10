@@ -86,12 +86,16 @@ CREATE TABLE `Reviews` (
 CREATE TABLE `Notifications` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `userId` INTEGER NOT NULL,
+    `bookingId` INTEGER NULL,
+    `transactionId` INTEGER NULL,
     `message` VARCHAR(191) NOT NULL,
     `type` ENUM('info', 'booking', 'payment', 'paid', 'confirmed', 'canceled', 'expired', 'review', 'completed') NOT NULL DEFAULT 'info',
     `is_read` BOOLEAN NOT NULL DEFAULT false,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` DATETIME(3) NOT NULL,
 
+    UNIQUE INDEX `Notifications_bookingId_key`(`bookingId`),
+    UNIQUE INDEX `Notifications_transactionId_key`(`transactionId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 

@@ -6,6 +6,7 @@ import StepPembayaran from "@/components/booking/steps/StepPembayaran";
 import StepSelesai from "@/components/booking/steps/StepSelesai";
 import ConfirmModal from "@/components/booking/steps/ConfirmModal";
 import PaymentModal from "@/components/booking/steps/PaymentModal";
+import { useNotificationContext } from "@/context/NotificationContext";
 import DashboardLayout from "@/layout/DashboardLayout";
 import Toast from "@/components/toast/Toast";
 import { AnimatePresence, motion } from "framer-motion";
@@ -27,6 +28,7 @@ const stepSlugMap: Record<string, number> = {
 };
 
 const BookingSteps = () => {
+  const { refetchNotifications } = useNotificationContext();
   const router = useRouter();
   const stepParam = router.query.step as string[] | undefined;
   const stepSlug = stepParam?.[0] ?? "";
@@ -161,7 +163,9 @@ const BookingSteps = () => {
       if (!res.ok) throw new Error("Gagal membuat transaksi");
 
       const data = await res.json();
+      refetchNotifications();
       localStorage.setItem("latestTransactionId", data.transaction.id);
+      setTransactionId(data.transaction.id);
       // console.log("Transaksi berhasil:", data);
 
       goToStep(2);
@@ -176,45 +180,11 @@ const BookingSteps = () => {
     setShowPaymentModal(true);
   };
 
-  // HANDLE SUBMIT PAYMENT PROOF
-  const handleSubmitPayment = async (file: File | null) => {
-    if (!file || !transactionId) {
-      setToast({ message: "Bukti pembayaran tidak valid", type: "error" });
-      return;
-    }
-
-    try {
-      const formData = new FormData();
-      formData.append("transactionId", transactionId.toString());
-      formData.append("amount", bookingData?.total_price?.toString() || "0");
-      // formData.append("notificationId", notificationId.toString());
-      formData.append("paymentProof", file);
-
-      const res = await fetch("/api/transactions/addPaymentProof", {
-        method: "POST",
-        body: formData,
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Gagal mengunggah bukti");
-
-      setTransactionId(null);
-      setToast({ message: data.message, type: "success" });
-      goToStep(3);
-      // setTimerActive(false);
-    } catch (error) {
-      console.error("Gagal kirim bukti:", error);
-      setToast({ message: "Gagal mengirim bukti pembayaran", type: "error" });
-    } finally {
-      setShowPaymentModal(false);
-    }
-  };
-
   // HARUS SELESAIKAN TRANSAKSI
   useEffect(() => {
     const rawSlug = router.query.step?.[0];
     if (rawSlug !== "payment" && transactionId) {
-      showToast("Dimohon selesaikan pembayaran dengan benar!", "error");
+      // showToast("Dimohon selesaikan pembayaran dengan benar!", "error");
       router.replace("/member/booking/payment");
       return;
     }
@@ -222,6 +192,7 @@ const BookingSteps = () => {
 
   useEffect(() => {
     if (currentStep === 3) {
+      // setTransactionId(null);
       localStorage.removeItem("latestBookingId");
       localStorage.removeItem("latestTransactionId");
     }
@@ -292,7 +263,25 @@ const BookingSteps = () => {
 
           <AnimatePresence>{showConfirmModal && <ConfirmModal selectedMethod={selectedMethod} onCancel={() => setShowConfirmModal(false)} onConfirm={handleConfirmPaymentMethod} />}</AnimatePresence>
 
-          <AnimatePresence>{showPaymentModal && <PaymentModal onClose={() => setShowPaymentModal(false)} onSubmit={handleSubmitPayment} />}</AnimatePresence>
+          <AnimatePresence>
+            {showPaymentModal && (
+              <PaymentModal
+                key={transactionId}
+                transactionId={transactionId}
+                onSuccess={() => {
+                  setTransactionId(null);
+                  setToast({ message: "Bukti pembayaran berhasil dikirim", type: "success" });
+                  refetchNotifications();
+                  goToStep(3);
+
+                  // refetchNotifications();
+                  // setToast({ message: data.message, type: "success" });
+                  // goToStep(3);
+                }}
+                onClose={() => setShowPaymentModal(false)}
+              />
+            )}
+          </AnimatePresence>
         </div>
       </DashboardLayout>
     </>

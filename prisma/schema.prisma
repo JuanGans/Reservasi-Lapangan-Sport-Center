@@ -55,6 +55,7 @@ model Bookings {
   sessions       BookingSessions[]
   transaction    Transactions?
   review         Reviews?
+  // notifications  Notifications[]
   created_at     DateTime         @default(now())
   updated_at     DateTime         @updatedAt
 }
@@ -110,11 +111,11 @@ enum PaymentMethod {
 
 // ENUM UNTUK STATUS TRANSAKSI
 enum TransactionStatus {
-  pending
-  paid
-  failed
-  expired
-  refunded
+  pending   // Pembayaran masih berlangsung
+  paid      // Pembayaran sudah dibayar
+  failed    // Pembayaran gagal atau ditolak
+  expired   // Pembayaran tidak dilakukan karena sudah kadaluarsa
+  refunded  // Pembayaran dilakukan refund karena user membatalkan booking atas izin dan konfirmasi admin
 }
 
 
@@ -131,14 +132,16 @@ model Reviews {
 
 // MODEL NOTIFICATION
 model Notifications {
-  id         Int              @id @default(autoincrement())
-  user       Users            @relation(fields: [userId], references: [id])
-  userId     Int
-  message    String
-  type       NotificationType @default(info)
-  is_read    Boolean          @default(false)
-  created_at DateTime         @default(now())
-  updated_at DateTime         @updatedAt
+  id             Int              @id @default(autoincrement())
+  user           Users            @relation(fields: [userId], references: [id])
+  userId         Int
+  bookingId      Int?             @unique  // Sebagai Target Untuk ID Booking (UNIK)
+  transactionId  Int?             @unique   // Sebagai Target Untuk ID Transaksi (UNIK)
+  message        String
+  type           NotificationType @default(info)
+  is_read        Boolean          @default(false)
+  created_at     DateTime         @default(now())
+  updated_at     DateTime         @updatedAt
 }
 
 // ENUM UNTUK NOTIFICATION TYPE

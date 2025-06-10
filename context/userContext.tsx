@@ -4,7 +4,7 @@ import { User } from "@/types/user";
 interface UserContextType {
   user: User | null;
   setUser: (user: User | null) => void;
-  refreshUser: () => Promise<void>; // agar komponen bisa trigger fetch ulang
+  refreshUser: () => Promise<void>;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -12,7 +12,6 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
 
-  // Fetch user dari API
   const fetchUser = async () => {
     try {
       const res = await fetch("/api/auth/me");
@@ -23,7 +22,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         setUser(null);
       }
     } catch (err) {
-      console.error("Gagal mengambil data user", err);
+      console.error("Gagal mengambil data user:", err);
       setUser(null);
     }
   };
@@ -35,11 +34,6 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   return <UserContext.Provider value={{ user, setUser, refreshUser: fetchUser }}>{children}</UserContext.Provider>;
 };
 
-// Custom hook
-export const useUser = (): UserContextType => {
-  const context = useContext(UserContext);
-  if (!context) {
-    throw new Error("useUser must be used within a UserProvider");
-  }
-  return context;
+export const useUser = (): UserContextType | null => {
+  return useContext(UserContext) ?? null;
 };
