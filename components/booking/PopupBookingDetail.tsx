@@ -19,32 +19,60 @@ type Props = {
   index: number;
 };
 
+const nomorRek = "123456789012345";
+const noHP = "081249217968";
+const namaPemilik = "PT. JTI Sport Center";
+
 const BookingDetailModal: React.FC<Props> = ({ booking, onClose, index }) => {
-  const [timeLeft, setTimeLeft] = useState<string>("");
+  const [countdown, setCountdown] = useState(30 * 60);
+  const isBank = booking?.transaction?.payment_method ? ["BNI", "BCA", "BRI", "Mandiri"].includes(booking?.transaction?.payment_method) : false;
 
   useEffect(() => {
     if (!booking || booking.booking_status !== "pending") return;
 
-    const tenggat = new Date(booking.created_at);
-    tenggat.setMinutes(tenggat.getMinutes() + 15);
-
+    const expiredAt = new Date(booking.expired_at).getTime();
     const interval = setInterval(() => {
-      const now = new Date();
-      const diff = tenggat.getTime() - now.getTime();
+      const now = new Date().getTime() + 7 * 60 * 60 * 1000;
+      const diffInSeconds = Math.floor((expiredAt - now) / 1000);
 
-      if (diff <= 0) {
-        setTimeLeft("Waktu habis");
+      if (diffInSeconds <= 0) {
         clearInterval(interval);
-        return;
+        setCountdown(0);
+        // Batalkan booking otomatis
+        expiredBooking();
+      } else {
+        setCountdown(diffInSeconds);
       }
-
-      const minutes = Math.floor(diff / 60000);
-      const seconds = Math.floor((diff % 60000) / 1000);
-      setTimeLeft(`${minutes}m ${seconds}s`);
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [booking]);
+  }, [booking?.expired_at]);
+
+  const expiredBooking = async () => {
+    try {
+      if (!booking) return;
+
+      await fetch(`/api/bookings/expiredBooking/${booking.id}`, {
+        method: "POST", // atau "PUT" tergantung API-mu
+      });
+
+      // localStorage.removeItem("latestBookingId");
+      // localStorage.removeItem("latestTransactionId");
+
+      // router.replace("/member?BookingExpired=1");
+      return;
+    } catch (err) {
+      console.error("Gagal membatalkan booking:", err);
+    }
+  };
+
+  const formatCountdown = (seconds: number) => {
+    const m = Math.floor(seconds / 60)
+      .toString()
+      .padStart(2, "0");
+    const s = (seconds % 60).toString().padStart(2, "0");
+    return `${m}:${s}`;
+  };
 
   if (!booking) return null;
 
@@ -52,18 +80,26 @@ const BookingDetailModal: React.FC<Props> = ({ booking, onClose, index }) => {
     <>
       <div className="bg-yellow-50 p-4 rounded-xl border border-yellow-300 mt-6 space-y-1">
         <p className="text-yellow-800 font-semibold text-sm">Tenggat Pembayaran:</p>
-        <p className="text-yellow-700">{timeLeft}</p>
+        <p className="text-yellow-700">{formatCountdown(countdown)}</p>
       </div>
 
-      <div className="mt-4 bg-gray-50 p-4 rounded-xl border flex items-center gap-4">
-        <img src="/bank-bca-logo.png" alt="BCA" className="w-12 h-12 object-contain" />
-        <div>
-          <p className="text-sm text-gray-800">
-            Transfer ke: <strong>1234567890</strong>
-          </p>
-          <p className="text-xs text-gray-500">a.n. PT Lapangan Sport</p>
+      {booking.transaction?.id && (
+        <div className="mt-8 bg-gray-50 p-4 rounded-xl border flex items-center gap-4">
+          <img src={`/assets/payment/${booking.transaction.payment_method.toLowerCase()}.png`} alt={booking.transaction.payment_method} className="w-12 h-12 object-contain" />
+          <div>
+            <p className="text-sm text-gray-800">
+              Metode yang dipilih: <strong>{booking.transaction.payment_method}</strong>
+            </p>
+            <p className="text-sm text-gray-800">
+              Transfer ke:{" "}
+              <strong>
+                {isBank ? nomorRek : noHP} {isBank ? `(BRI)` : ""}
+              </strong>
+            </p>
+            <p className="text-xs text-gray-500">{namaPemilik}</p>
+          </div>
         </div>
-      </div>
+      )}
     </>
   );
 

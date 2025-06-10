@@ -14,11 +14,16 @@ const MemberPage: React.FC = () => {
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [filterStatus, setFilterStatus] = useState<BookingStatus>("all");
-  const user = useUser();
+
   const router = useRouter();
+  const userContext = useUser();
+  if (!userContext) {
+    return null;
+  }
+  const { user } = userContext;
 
   useEffect(() => {
-    const { restricted, repeat, notBooking } = router.query;
+    const { restricted, repeat, notBooking, BookingExpired } = router.query;
     if (restricted === "1") {
       setToast({ message: "Tidak dapat akses, anda bukan admin!", type: "error" });
       router.replace(router.pathname); // Bersihkan query
@@ -28,6 +33,9 @@ const MemberPage: React.FC = () => {
     } else if (notBooking === "1") {
       setToast({ message: "Anda melakukan tindakan ilegal!", type: "error" });
       router.replace(router.pathname); // Bersihkan query
+    } else if (BookingExpired === "1") {
+      setToast({ message: "Waktu pembayaran habis, booking dibatalkan", type: "error" });
+      router.replace(router.pathname);
     }
   }, [router]);
 
@@ -88,7 +96,7 @@ const MemberPage: React.FC = () => {
         </div>
 
         {/* Tabel Booking */}
-        <ResponsiveBookingView bookings={bookings} filterStatus={filterStatus} setFilterStatus={setFilterStatus} role={user.user?.role ?? "member"} />
+        <ResponsiveBookingView bookings={bookings} filterStatus={filterStatus} setFilterStatus={setFilterStatus} role={user?.role ?? "member"} />
       </DashboardLayout>
     </>
   );

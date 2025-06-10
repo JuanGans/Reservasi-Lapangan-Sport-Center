@@ -19,9 +19,16 @@ const DetailCatalogPage: React.FC = () => {
   const [recommendationSeed, setRecommendationSeed] = useState(Math.random());
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
+  const [invalidSessions, setInvalidSessions] = useState<string[]>([]);
 
   const today = new Date().toISOString().split("T")[0];
   const [bookedSessions, setBookedSessions] = useState<string[]>([]);
+
+  // CONVERT DALAM WAKTU WIB
+  const toWIB = (localDate: Date) => {
+    const offsetMs = localDate.getTimezoneOffset() * 60000; // konversi menit ke ms
+    return new Date(localDate.getTime() - offsetMs); // waktu dalam WIB
+  };
 
   useEffect(() => {
     if (!selectedDate || !facility?.id) return;
@@ -37,10 +44,7 @@ const DetailCatalogPage: React.FC = () => {
 
         sameDayBookings.forEach((b: any) => {
           b.sessions.forEach((s: any) => {
-            const start = new Date(s.start_time);
-            const end = new Date(s.end_time);
-
-            const formatted = `${start.getHours().toString().padStart(2, "0")}:${start.getMinutes().toString().padStart(2, "0")} - ${end.getHours().toString().padStart(2, "0")}:${end.getMinutes().toString().padStart(2, "0")}`;
+            const formatted = s.session_label;
             booked.push(formatted);
           });
         });
@@ -102,6 +106,7 @@ const DetailCatalogPage: React.FC = () => {
   }, [id]);
 
   const toggleSession = (session: string) => {
+    setInvalidSessions([]);
     setSelectedSessions((prev) => (prev.includes(session) ? prev.filter((s) => s !== session) : [...prev, session]));
   };
 
@@ -130,6 +135,51 @@ const DetailCatalogPage: React.FC = () => {
     return new Date(iso).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
   };
 
+  // CHECK SEQUENTIAL BARU
+  // ADA BUG (KETIKA PILIH TODAY ATAU HARI INI, DAN KETIKA PILIH TIDAK URUT DULUAN, MAKA GA BISA BOOKING)
+  // DAN ADA BUG KETIKA TANGGAL LAIN, TIDAK SEMUA DI INVALID
+  // KEDUA BUG ITU PR, JANGAN DIPERBAIKI TANPA TAHU ALGORITMANYA
+  // const checkSequentialSessions = (sessions: string[]): boolean => {
+  //   if (sessions.length < 2) {
+  //     setInvalidSessions([]);
+  //     return true; // hanya 1 sesi, pasti valid
+  //   }
+
+  //   const sorted = [...sessions].sort();
+  //   const invalid: string[] = [];
+
+  //   for (let i = 0; i < sorted.length - 1; i++) {
+  //     const [, currEnd] = sorted[i].split(" - ");
+  //     const [nextStart] = sorted[i + 1].split(" - ");
+
+  //     if (currEnd.trim() !== nextStart.trim()) {
+  //       invalid.push(sorted[i], sorted[i + 1]);
+  //     }
+  //   }
+
+  //   const isValid = invalid.length === 0;
+  //   setInvalidSessions(isValid ? [] : Array.from(new Set(invalid))); // unikkan
+
+  //   return isValid;
+  // };
+
+  // CHECK SEQUENTIAL LAMA, TAPI HANYA BISA DUA HINGGA TIGA SESI AJA
+  const checkSequentialSessions = (sessions: string[]): boolean => {
+    const sorted = [...sessions].sort();
+    const invalid: string[] = [];
+
+    for (let i = 0; i < sorted.length - 1; i++) {
+      const [currEnd] = sorted[i].split(" - ").slice(1);
+      const [nextStart] = sorted[i + 1].split(" - ");
+      if (currEnd.trim() !== nextStart.trim()) {
+        invalid.push(sorted[i], sorted[i + 1]);
+      }
+    }
+
+    setInvalidSessions(invalid);
+    return invalid.length === 0;
+  };
+
   const recommended = allFields
     .filter((f) => f.id !== Number(id))
     .sort(() => recommendationSeed - 0.5)
@@ -154,8 +204,8 @@ const DetailCatalogPage: React.FC = () => {
       const sessionData = selectedSessions.map((label) => {
         // Jika label = "08:00 - 09:00", ambil jam mulai dan selesai
         const [startLabel, endLabel] = label.split(" - ");
-        const startDate = new Date(`${booking_date}T${startLabel}:00`);
-        const endDate = new Date(`${booking_date}T${endLabel}:00`);
+        const startDate = toWIB(new Date(`${booking_date}T${startLabel}:00`));
+        const endDate = toWIB(new Date(`${booking_date}T${endLabel}:00`));
 
         if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
           throw new Error("Format waktu sesi tidak valid");
@@ -165,6 +215,7 @@ const DetailCatalogPage: React.FC = () => {
         return {
           start_time: startDate.toISOString(),
           end_time: endDate.toISOString(),
+          session_label: label,
         };
       });
 
@@ -187,6 +238,12 @@ const DetailCatalogPage: React.FC = () => {
       if (data.error) throw new Error(data.error);
 
       localStorage.setItem("latestBookingId", data.booking.id);
+
+      // LATEST TRANSACTION ID
+      if (localStorage.getItem("latestTransactionId")) {
+        localStorage.removeItem("latestTransactionId");
+      }
+
       router.push(`/member/booking/detail`);
     } catch (err) {
       console.error("Booking gagal:", err);
@@ -254,14 +311,22 @@ const DetailCatalogPage: React.FC = () => {
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
                     {sessions.map((session) => {
                       const disabled = isSessionDisabled(session);
+                      const isInvalid = invalidSessions.includes(session);
                       return (
                         <button
                           key={session}
                           onClick={() => toggleSession(session)}
                           disabled={disabled}
-                          className={`w-full px-4 py-2 rounded border transition text-sm cursor-pointer ${
-                            disabled ? "bg-gray-200 text-gray-400 border-gray-300 cursor-not-allowed" : selectedSessions.includes(session) ? "bg-blue-600 text-white border-blue-600" : "bg-white text-gray-800 hover:bg-blue-50"
-                          }`}
+                          className={`w-full px-4 py-2 rounded border transition text-sm cursor-pointer 
+                            ${
+                              disabled
+                                ? "bg-gray-200 text-gray-400 border-gray-300 cursor-not-allowed"
+                                : selectedSessions.includes(session)
+                                ? isInvalid
+                                  ? "bg-red-100 text-red-600 border-red-400 animate-shake"
+                                  : "bg-blue-600 text-white border-blue-600"
+                                : "bg-white text-gray-800 hover:bg-blue-50"
+                            }`}
                         >
                           {session}
                         </button>
@@ -287,7 +352,13 @@ const DetailCatalogPage: React.FC = () => {
                   <PopupBooking
                     isOpen={showPopup}
                     onClose={() => setShowPopup(false)}
-                    onConfirm={() =>
+                    onConfirm={() => {
+                      if (!checkSequentialSessions(selectedSessions)) {
+                        setToast({ message: "Sesi yang dipilih harus berurutan. Silakan pilih ulang.", type: "error" });
+                        return;
+                      }
+
+                      setInvalidSessions([]);
                       handleAddBooking({
                         facilityId: facility.id,
                         booking_date: selectedDate,
@@ -295,8 +366,8 @@ const DetailCatalogPage: React.FC = () => {
                         selectedSessions,
                         router,
                         setToast,
-                      })
-                    }
+                      });
+                    }}
                     facilityName={facility.field_name}
                     selectedDate={selectedDate}
                     selectedSessions={selectedSessions}

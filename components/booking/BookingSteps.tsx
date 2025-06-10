@@ -38,7 +38,7 @@ const BookingSteps = () => {
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod | null>(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [countdown, setCountdown] = useState(15 * 60);
+  const [countdown, setCountdown] = useState(30 * 60);
   // const [timerActive, setTimerActive] = useState(false);
 
   const [bookingData, setBookingData] = useState<Booking | null>(null);
@@ -108,23 +108,45 @@ const BookingSteps = () => {
     router.push(path);
   };
 
-  // useEffect(() => {
-  //   let timer: NodeJS.Timeout | null = null;
+  const expiredBooking = async () => {
+    try {
+      if (!latestBookingId) return;
 
-  //   if (timerActive && countdown > 0) {
-  //     timer = setInterval(() => setCountdown((c) => c - 1), 1000);
-  //   } else if (countdown === 0) {
-  //     setTimerActive(false);
-  //     alert("Waktu pembayaran habis, silakan ulangi proses booking.");
-  //     goToStep(0);
-  //     setSelectedMethod(null);
-  //     setCountdown(15 * 60);
-  //   }
+      await fetch(`/api/bookings/expiredBooking/${latestBookingId}`, {
+        method: "POST", // atau "PUT" tergantung API-mu
+      });
 
-  //   return () => {
-  //     if (timer) clearInterval(timer);
-  //   };
-  // }, [timerActive, countdown]);
+      localStorage.removeItem("latestBookingId");
+      localStorage.removeItem("latestTransactionId");
+
+      router.replace("/member?BookingExpired=1");
+      return;
+    } catch (err) {
+      console.error("Gagal membatalkan booking:", err);
+    }
+  };
+
+  useEffect(() => {
+    if (!bookingData?.expired_at) return;
+
+    const expiredAt = new Date(bookingData.expired_at).getTime();
+
+    const interval = setInterval(() => {
+      const now = new Date().getTime() + 7 * 60 * 60 * 1000;
+      const diffInSeconds = Math.floor((expiredAt - now) / 1000);
+
+      if (diffInSeconds <= 0) {
+        clearInterval(interval);
+        setCountdown(0);
+        // Batalkan booking otomatis
+        expiredBooking();
+      } else {
+        setCountdown(diffInSeconds);
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [bookingData?.expired_at]);
 
   const handleNext = () => {
     if (currentStep === 1 && !selectedMethod) {

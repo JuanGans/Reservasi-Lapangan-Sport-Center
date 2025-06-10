@@ -32,11 +32,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         facilityId,
         booking_date: new Date(booking_date),
         total_price,
+        expired_at: new Date(new Date().getTime() + (7 * 60 + 30) * 60 * 1000),
         sessions: {
-          create: sessions.map((s: { start_time: string; end_time: string }) => ({
+          create: sessions.map((s: { start_time: string; end_time: string; session_label: string }) => ({
             start_time: new Date(s.start_time),
             end_time: new Date(s.end_time),
-            session_label: `${new Date(s.start_time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} - ${new Date(s.end_time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`,
+            session_label: s.session_label,
           })),
         },
       },
@@ -52,6 +53,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         message: `Booking lapangan ${booking.facility.field_name} berhasil dibuat, silahkan lanjutkan ke pembayaran.`,
         type: "booking",
         bookingId: booking.id,
+        transactionId: null,
       },
     });
 

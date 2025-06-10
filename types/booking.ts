@@ -24,5 +24,9 @@ export type Booking = {
     field_name: string;
     field_image?: string;
   };
+  transaction?: {
+    id: number;
+    payment_method: string;
+  };
   sessions?: BookingSession[];
 };

@@ -30,17 +30,25 @@ const StepPembayaran: React.FC<StepPembayaranProps> = ({ selectedMethod, countdo
 
   const formatPrice = (price: number) => new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR" }).format(price);
 
-  const renderCountdown = () => {
-    const min = String(Math.floor(countdown / 60)).padStart(2, "0");
-    const sec = String(countdown % 60).padStart(2, "0");
-    return `${min}:${sec}`;
+  // const renderCountdown = () => {
+  //   const min = String(Math.floor(countdown / 60)).padStart(2, "0");
+  //   const sec = String(countdown % 60).padStart(2, "0");
+  //   return `${min}:${sec}`;
+  // };
+
+  const formatCountdown = (seconds: number) => {
+    const m = Math.floor(seconds / 60)
+      .toString()
+      .padStart(2, "0");
+    const s = (seconds % 60).toString().padStart(2, "0");
+    return `${m}:${s}`;
   };
 
   const durasi = booking.sessions?.length || 0;
   const sesiText = booking.sessions?.map((s) => s.session_label).join(", ");
   const nomorRek = "123456789012345";
   const noHP = "081249217968";
-  const namaPemilik = "Mochamad Imam Hanafi";
+  const namaPemilik = "PT. JTI Sport Center";
 
   return (
     <>
@@ -110,7 +118,7 @@ const StepPembayaran: React.FC<StepPembayaranProps> = ({ selectedMethod, countdo
           </div>
           <div className="flex justify-between text-red-600 font-semibold border-t pt-3">
             <span>Batas Waktu Pembayaran</span>
-            <span>{renderCountdown()}</span>
+            <span>{formatCountdown(countdown)}</span>
           </div>
 
           {/* RINCIAN BOOKING */}

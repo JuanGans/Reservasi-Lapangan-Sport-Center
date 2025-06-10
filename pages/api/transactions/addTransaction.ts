@@ -30,7 +30,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     await prisma.notifications.update({
       where: { bookingId: bookingId },
       data: {
-        message: `Segera lakukan pembayaran sebelum 15 menit habis.`,
+        message: `Segera lakukan pembayaran booking sebelum waktu habis.`,
         type: "payment",
         is_read: false,
         transactionId: transaction.id,
