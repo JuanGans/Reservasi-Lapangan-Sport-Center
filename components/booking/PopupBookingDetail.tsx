@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Booking } from "@/types/booking";
+import { useRouter } from "next/router";
 
 const backdropVariants = {
   hidden: { opacity: 0 },
@@ -25,7 +26,23 @@ const namaPemilik = "PT. JTI Sport Center";
 
 const BookingDetailModal: React.FC<Props> = ({ booking, onClose, index }) => {
   const [countdown, setCountdown] = useState(30 * 60);
+  const router = useRouter();
   const isBank = booking?.transaction?.payment_method ? ["BNI", "BCA", "BRI", "Mandiri"].includes(booking?.transaction?.payment_method) : false;
+  const [routing, setRouting] = useState("");
+
+  useEffect(() => {
+    if (booking) {
+      if (!booking.transaction?.payment_method || !booking.transaction?.id) {
+        setRouting("detail");
+        localStorage.setItem("latestBookingId", booking.id.toString());
+        localStorage.removeItem("latestTransactionId");
+      } else {
+        setRouting("payment");
+        localStorage.setItem("latestBookingId", booking.id.toString());
+        localStorage.setItem("latestTransactionId", booking.transaction.id.toString());
+      }
+    }
+  }, [booking]);
 
   useEffect(() => {
     if (!booking || booking.booking_status !== "pending") return;
@@ -56,8 +73,8 @@ const BookingDetailModal: React.FC<Props> = ({ booking, onClose, index }) => {
         method: "POST", // atau "PUT" tergantung API-mu
       });
 
-      // localStorage.removeItem("latestBookingId");
-      // localStorage.removeItem("latestTransactionId");
+      localStorage.removeItem("latestBookingId");
+      localStorage.removeItem("latestTransactionId");
 
       // router.replace("/member?BookingExpired=1");
       return;
@@ -107,7 +124,16 @@ const BookingDetailModal: React.FC<Props> = ({ booking, onClose, index }) => {
     switch (booking.booking_status) {
       case "pending":
         return (
-          <button onClick={() => alert("Lanjut ke pembayaran")} className="px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition w-full sm:w-auto cursor-pointer">
+          <button
+            onClick={() => {
+              localStorage.setItem("latestBookingId", booking.id.toString());
+              if (routing == "payment" && booking.transaction?.id) {
+                localStorage.setItem("latestTransactionId", booking.transaction.id.toString());
+              }
+              router.push(`/member/booking/${routing}`);
+            }}
+            className="px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition w-full sm:w-auto cursor-pointer"
+          >
             Lanjut ke Pembayaran
           </button>
         );

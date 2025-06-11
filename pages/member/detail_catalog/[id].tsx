@@ -24,11 +24,26 @@ const DetailCatalogPage: React.FC = () => {
   const today = new Date().toISOString().split("T")[0];
   const [bookedSessions, setBookedSessions] = useState<string[]>([]);
 
-  // CONVERT DALAM WAKTU WIB
-  const toWIB = (localDate: Date) => {
-    const offsetMs = localDate.getTimezoneOffset() * 60000; // konversi menit ke ms
-    return new Date(localDate.getTime() - offsetMs); // waktu dalam WIB
-  };
+  function parseSessionToWIBDate(label: string, booking_date: string): { startDate: Date; endDate: Date } {
+    const [startLabel, endLabel] = label.split(" - ");
+    const [startHour, startMinute] = startLabel.split(":").map(Number);
+    const [endHour, endMinute] = endLabel.split(":").map(Number);
+
+    const baseDate = new Date(booking_date);
+    const year = baseDate.getFullYear();
+    const month = baseDate.getMonth();
+    const day = baseDate.getDate();
+
+    let startDate = new Date(year, month, day, startHour, startMinute);
+    let endDate = new Date(year, month, day, endHour, endMinute);
+
+    // Jika end jam < start jam, berarti sesi lintas hari
+    // if (endHour < startHour || (endHour === startHour && endMinute < startMinute)) {
+    //   endDate.setDate(endDate.getDate() + 1);
+    // }
+
+    return { startDate, endDate };
+  }
 
   useEffect(() => {
     if (!selectedDate || !facility?.id) return;
@@ -135,48 +150,36 @@ const DetailCatalogPage: React.FC = () => {
     return new Date(iso).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
   };
 
-  // CHECK SEQUENTIAL BARU
-  // ADA BUG (KETIKA PILIH TODAY ATAU HARI INI, DAN KETIKA PILIH TIDAK URUT DULUAN, MAKA GA BISA BOOKING)
-  // DAN ADA BUG KETIKA TANGGAL LAIN, TIDAK SEMUA DI INVALID
-  // KEDUA BUG ITU PR, JANGAN DIPERBAIKI TANPA TAHU ALGORITMANYA
-  // const checkSequentialSessions = (sessions: string[]): boolean => {
-  //   if (sessions.length < 2) {
-  //     setInvalidSessions([]);
-  //     return true; // hanya 1 sesi, pasti valid
-  //   }
-
-  //   const sorted = [...sessions].sort();
-  //   const invalid: string[] = [];
-
-  //   for (let i = 0; i < sorted.length - 1; i++) {
-  //     const [, currEnd] = sorted[i].split(" - ");
-  //     const [nextStart] = sorted[i + 1].split(" - ");
-
-  //     if (currEnd.trim() !== nextStart.trim()) {
-  //       invalid.push(sorted[i], sorted[i + 1]);
-  //     }
-  //   }
-
-  //   const isValid = invalid.length === 0;
-  //   setInvalidSessions(isValid ? [] : Array.from(new Set(invalid))); // unikkan
-
-  //   return isValid;
-  // };
-
-  // CHECK SEQUENTIAL LAMA, TAPI HANYA BISA DUA HINGGA TIGA SESI AJA
   const checkSequentialSessions = (sessions: string[]): boolean => {
-    const sorted = [...sessions].sort();
+    if (sessions.length < 2) {
+      setInvalidSessions([]);
+      return true;
+    }
+
+    // Konversi semua sesi jadi waktu Date
+    const sessionTimes = sessions
+      .map((label) => {
+        const [start, end] = label.split(" - ");
+        return {
+          label,
+          start: parseInt(start.replace(":", ""), 10), // 0800, 0900, dst
+          end: parseInt(end.replace(":", ""), 10),
+        };
+      })
+      .sort((a, b) => a.start - b.start); // urutkan berdasarkan waktu mulai
+
     const invalid: string[] = [];
 
-    for (let i = 0; i < sorted.length - 1; i++) {
-      const [currEnd] = sorted[i].split(" - ").slice(1);
-      const [nextStart] = sorted[i + 1].split(" - ");
-      if (currEnd.trim() !== nextStart.trim()) {
-        invalid.push(sorted[i], sorted[i + 1]);
+    for (let i = 0; i < sessionTimes.length - 1; i++) {
+      const curr = sessionTimes[i];
+      const next = sessionTimes[i + 1];
+
+      if (curr.end !== next.start) {
+        invalid.push(curr.label, next.label);
       }
     }
 
-    setInvalidSessions(invalid);
+    setInvalidSessions([...new Set(invalid)]);
     return invalid.length === 0;
   };
 
@@ -203,18 +206,27 @@ const DetailCatalogPage: React.FC = () => {
     try {
       const sessionData = selectedSessions.map((label) => {
         // Jika label = "08:00 - 09:00", ambil jam mulai dan selesai
-        const [startLabel, endLabel] = label.split(" - ");
-        const startDate = toWIB(new Date(`${booking_date}T${startLabel}:00`));
-        const endDate = toWIB(new Date(`${booking_date}T${endLabel}:00`));
+        const { startDate, endDate } = parseSessionToWIBDate(label, booking_date);
 
-        if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-          throw new Error("Format waktu sesi tidak valid");
-          // setToast({ message: "Tidak bisa memilh sesi yang berbeda atau beruntun", type: "error" });
+        // LABEL TANGGAL TIDAK SESUAI
+        if (!label.includes(" - ") || !booking_date.match(/^\d{4}-\d{2}-\d{2}$/)) {
+          throw new Error("Format label atau tanggal tidak sesuai");
         }
 
+        // START TIME TIDAK SESUAI
+        if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+          console.error("startDate:", startDate);
+          console.error("endDate:", endDate);
+          throw new Error("Format waktu sesi tidak valid");
+        }
+
+        const addHours = (date: Date, hours: number) => {
+          return new Date(date.getTime() + hours * 60 * 60 * 1000);
+        };
+
         return {
-          start_time: startDate.toISOString(),
-          end_time: endDate.toISOString(),
+          start_time: addHours(startDate, 7).toISOString(),
+          end_time: addHours(endDate, 7).toISOString(),
           session_label: label,
         };
       });
@@ -353,7 +365,8 @@ const DetailCatalogPage: React.FC = () => {
                     isOpen={showPopup}
                     onClose={() => setShowPopup(false)}
                     onConfirm={() => {
-                      if (!checkSequentialSessions(selectedSessions)) {
+                      const filteredSessions = selectedSessions.filter((s) => !isSessionDisabled(s));
+                      if (!checkSequentialSessions(filteredSessions)) {
                         setToast({ message: "Sesi yang dipilih harus berurutan. Silakan pilih ulang.", type: "error" });
                         return;
                       }

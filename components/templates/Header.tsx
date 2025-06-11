@@ -56,7 +56,11 @@ const Header: React.FC = () => {
           message: notif.message,
           type: "booking",
           actionLabel: "Lanjutkan ke Booking",
-          onAction: () => router.push(`/member/booking/detail`),
+          onAction: () => {
+            localStorage.setItem("latestBookingId", notif.bookingId.toString());
+            localStorage.removeItem("latestTransactionId");
+            router.push(`/member/booking/detail`);
+          },
         });
         break;
       case "payment":
@@ -64,7 +68,11 @@ const Header: React.FC = () => {
           message: notif.message,
           type: "payment",
           actionLabel: "Lanjutkan ke Pembayaran",
-          onAction: () => router.push(`/member/booking/payment`),
+          onAction: () => {
+            localStorage.setItem("latestBookingId", notif.bookingId.toString());
+            localStorage.setItem("latestTransactionId", notif.transactionId.toString());
+            router.push(`/member/booking/payment`);
+          },
         });
         break;
       case "confirmed":
