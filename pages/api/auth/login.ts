@@ -19,7 +19,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const connection = connectDB();
 
     // Cari user berdasarkan username
-    const [rows] = await connection.execute("SELECT * FROM users WHERE username = ?", [username]);
+    const [rows] = await connection.execute("SELECT * FROM `Users` WHERE username = ?", [username]);
+
 
     if (!Array.isArray(rows) || rows.length === 0) {
       return res.status(401).json({ message: "User tidak ditemukan!" });
