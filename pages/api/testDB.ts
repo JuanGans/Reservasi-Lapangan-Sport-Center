@@ -4,7 +4,7 @@ import { connectDB } from "@/lib/db";
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     const db = await connectDB();
-    const [rows] = await db.query("SELECT NOW() AS current_time");
+    const [rows] = await db.query("SELECT NOW() AS `waktu_sekarang`");
 
     res.status(200).json({
       message: "Berhasil terhubung ke database!",
