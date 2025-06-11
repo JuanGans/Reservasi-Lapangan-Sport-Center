@@ -6,7 +6,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   if (req.method === "GET") {
     try {
-      const [users] = await db.query("SELECT id, fullname, username, email, role, no_hp, user_img FROM users");
+      const [users] = await db.query("SELECT id, fullname, username, email, role, no_hp, user_img FROM `Users`");
       return res.status(200).json(users);
     } catch (error: any) {
       return res.status(500).json({ message: "Gagal mengambil data user", error: error.message });
