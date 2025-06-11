@@ -16,11 +16,11 @@ type Props = {
 
 const BookingConfirmationModal = ({ isOpen, onClose, onConfirm, selectedUser, selectedFacility, selectedDate, selectedSlots, totalPrice }: Props) => {
   useEffect(() => {
-    document.body.style.overflow = "hidden";
+    document.body.style.overflow = isOpen ? "hidden" : "auto";
     return () => {
       document.body.style.overflow = "auto";
     };
-  }, []);
+  }, [isOpen]);
   return (
     <AnimatePresence>
       {isOpen && (

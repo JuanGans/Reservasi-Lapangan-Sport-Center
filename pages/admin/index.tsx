@@ -52,9 +52,9 @@ const AdminDashboard = () => {
   }, []);
 
   const totalBookings = bookings.length;
-  const paidBookings = bookings.filter((b) => b.booking_status === "paid" || b.booking_status === "completed").length;
-  const canceledBookings = bookings.filter((b) => b.booking_status === "canceled").length;
-  const totalRevenue = bookings.filter((b) => b.booking_status === "paid" || b.booking_status === "completed").reduce((sum, b) => sum + b.total_price, 0);
+  const paidBookings = bookings.filter((b) => b.booking_status === "confirmed" || b.booking_status === "completed").length;
+  const canceledBookings = bookings.filter((b) => b.booking_status === "canceled" || b.booking_status === "expired").length;
+  const totalRevenue = bookings.filter((b) => b.booking_status === "confirmed" || b.booking_status === "completed").reduce((sum, b) => sum + b.total_price, 0);
 
   const userBookingCount: Record<string, number> = {};
   bookings.forEach((b) => {
