@@ -1,10 +1,11 @@
+// This file defines a UserContext to manage user state across the application.
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { User } from "@/types/user";
 
 interface UserContextType {
   user: User | null;
   setUser: (user: User | null) => void;
-  refreshUser: () => Promise<void>;
+  refreshUser: () => Promise<void>; 
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
