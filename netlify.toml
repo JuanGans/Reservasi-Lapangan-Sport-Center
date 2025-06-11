@@ -1,7 +1,0 @@
-[functions]
-  directory = "netlify/functions"
-
-[[redirect]]
-from = "/*"
-to = "/pages/index.tsx"
-status = 200

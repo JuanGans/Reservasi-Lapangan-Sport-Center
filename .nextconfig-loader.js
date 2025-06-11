@@ -8,7 +8,6 @@ tsNode.register({
   },
 });
 
-/** @returns {import('next').NextConfig} */
 exports.loadConfig = () => {
   const configPath = path.resolve(__dirname, 'next.config.ts');
   const config = require(configPath);

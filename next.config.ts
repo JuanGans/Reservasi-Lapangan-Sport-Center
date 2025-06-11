@@ -6,3 +6,7 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
+
+const { loadConfig } = require('./.nextconfig-loader');
+
+module.exports = loadConfig();
