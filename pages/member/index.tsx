@@ -22,6 +22,25 @@ const MemberPage: React.FC = () => {
   }
   const { user } = userContext;
 
+useEffect(() => {
+  const checkAuth = async () => {
+    try {
+      const res = await fetch("/api/auth/me");
+      if (!res.ok) throw new Error("Unauthorized");
+      const userData = await res.json();
+
+      // Jika sudah login, isi context atau validasi lanjut
+      if (!userData?.id) throw new Error("Invalid user");
+
+    } catch (error) {
+      // Redirect user ke login jika unauthorized
+      router.push("/login");
+    }
+  };
+
+  checkAuth();
+}, []);
+
   useEffect(() => {
     const { restricted, repeat, notBooking, BookingExpired } = router.query;
     if (restricted === "1") {
@@ -40,15 +59,48 @@ const MemberPage: React.FC = () => {
   }, [router]);
 
   // Mengambil data fasilitas
-  useEffect(() => {
-    async function fetchFacilities() {
+useEffect(() => {
+  async function fetchFacilities() {
+    try {
       const res = await fetch("/api/facilities/getAllFacilities");
+      if (!res.ok) throw new Error("Gagal mengambil data fasilitas");
+
       const data = await res.json();
       setFacilities(data);
+    } catch (err) {
+      console.error(err);
+      setFacilities([]); // default empty
+      setToast({ message: "Gagal mengambil data fasilitas", type: "error" });
     }
+  }
 
-    fetchFacilities();
-  }, []);
+  fetchFacilities();
+}, []);
+
+useEffect(() => {
+  async function fetchBookings() {
+    try {
+      const userRes = await fetch("/api/auth/me");
+      if (!userRes.ok) throw new Error("Unauthorized");
+
+      const user = await userRes.json();
+      if (!user?.id) throw new Error("User tidak ditemukan");
+
+      const res = await fetch(`/api/bookings/getAllBookingsById/${user.id}`);
+      const data = await res.json();
+
+      setBookings(data);
+    } catch (error) {
+      console.error(error);
+      setBookings([]); // prevent crash
+      setToast({ message: "Gagal mengambil data booking", type: "error" });
+    }
+  }
+
+  fetchBookings();
+}, []);
+
+
 
   // Mengambil data booking
   useEffect(() => {
@@ -78,7 +130,8 @@ const MemberPage: React.FC = () => {
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
       <DashboardLayout title="Dashboard Member">
         {/* Carousel Gambar Lapangan */}
-        <Carousel facilities={facilities} />
+        <Carousel facilities={Array.isArray(facilities) ? facilities : []} />
+
 
         {/* Filter Status Booking */}
         <div className="mt-6">
@@ -96,7 +149,12 @@ const MemberPage: React.FC = () => {
         </div>
 
         {/* Tabel Booking */}
-        <ResponsiveBookingView bookings={bookings} filterStatus={filterStatus} setFilterStatus={setFilterStatus} role={user?.role ?? "member"} />
+        <ResponsiveBookingView
+  bookings={Array.isArray(bookings) ? bookings : []}
+  filterStatus={filterStatus}
+  setFilterStatus={setFilterStatus}
+  role={user?.role ?? "member"}
+/>
       </DashboardLayout>
     </>
   );
