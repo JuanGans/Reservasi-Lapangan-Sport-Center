@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { User } from "@/types/user";
 import UserTable from "@/components/user/UserTable";
 import UserModal from "@/components/user/UserModal";
@@ -67,31 +67,36 @@ export default function UserManagementPage() {
 
           {loading ? <div className="text-center py-20 animate-pulse text-gray-800">Loading data pengguna...</div> : <UserTable users={users} onEdit={handleEdit} onDelete={handleDelete} />}
 
-          {isModalOpen && (
-            <UserModal
-              user={selectedUser}
-              onClose={() => setIsModalOpen(false)}
-              refreshUsers={fetchUsers}
-              onSuccess={(type) => {
-                setToast({
-                  message: `Data User Berhasil ${type === "add" ? "Ditambah" : "Diubah"}`,
-                  type: "success",
-                });
-              }}
-            />
-          )}
+          <AnimatePresence>
+            {isModalOpen && (
+              <UserModal
+                user={selectedUser}
+                onClose={() => setIsModalOpen(false)}
+                refreshUsers={fetchUsers}
+                onSuccess={(type) => {
+                  setToast({
+                    message: `Data User Berhasil ${type === "add" ? "Ditambah" : "Diubah"}`,
+                    type: "success",
+                  });
+                }}
+              />
+            )}
+          </AnimatePresence>
 
-          {deleteUserId !== null && (
-            <DeleteConfirmModal
-              userId={deleteUserId}
-              onCancel={() => setDeleteUserId(null)}
-              onDeleted={() => {
-                setDeleteUserId(null);
-                fetchUsers();
-                setToast({ message: "Data User Berhasil Dihapus", type: "success" });
-              }}
-            />
-          )}
+          <AnimatePresence>
+            {deleteUserId !== null && (
+              <DeleteConfirmModal
+                userId={deleteUserId}
+                user={selectedUser?.fullname || ""}
+                onCancel={() => setDeleteUserId(null)}
+                onDeleted={() => {
+                  setDeleteUserId(null);
+                  fetchUsers();
+                  setToast({ message: "Data User Berhasil Dihapus", type: "success" });
+                }}
+              />
+            )}
+          </AnimatePresence>
         </motion.div>
       </DashboardLayout>
     </>

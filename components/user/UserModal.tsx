@@ -139,8 +139,14 @@ export default function UserModal({ user, onClose, onSuccess, refreshUsers }: Pr
   }, []);
 
   return (
-    <motion.div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center px-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-      <motion.div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl p-6 md:p-8 relative md:scale-100 scale-80" initial={{ scale: 0.9 }} animate={{ scale: 1 }}>
+    <motion.div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center px-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+      <motion.div
+        className="bg-white rounded-2xl shadow-2xl w-full max-w-xl p-6 md:p-8 relative md:scale-100 scale-80"
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.9, opacity: 0 }}
+        transition={{ duration: 0.2 }}
+      >
         <h2 className="text-2xl font-bold mb-6 text-blue-900 text-center">{isEdit ? "Edit User" : "Tambah User"}</h2>
 
         <form onSubmit={handleSubmit} className="space-y-5">

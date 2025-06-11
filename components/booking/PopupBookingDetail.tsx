@@ -138,12 +138,12 @@ const BookingDetailModal: React.FC<Props> = ({ booking, onClose, index, role }) 
             Lanjut ke Pembayaran
           </button>
         );
-      case "paid":
-        return (
-          <button onClick={() => alert("Hubungi admin untuk pembatalan")} className="px-5 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl transition w-full sm:w-auto cursor-pointer">
-            Batal Booking
-          </button>
-        );
+      // case "paid":
+      //   return (
+      //     <button onClick={() => alert("Hubungi admin untuk pembatalan")} className="px-5 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl transition w-full sm:w-auto cursor-pointer">
+      //       Batal Booking
+      //     </button>
+      //   );
       case "review":
         return (
           <button onClick={() => alert("Arahkan ke halaman ulasan")} className="px-5 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-xl transition w-full sm:w-auto cursor-pointer">

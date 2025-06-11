@@ -75,14 +75,6 @@ const Header: React.FC = () => {
           },
         });
         break;
-      case "confirmed":
-        showNotif({
-          message: notif.message,
-          type: "confirmed",
-          actionLabel: "Batalkan Booking",
-          onAction: () => router.push(""),
-        });
-        break;
       case "review":
         showNotif({
           message: notif.message,
