@@ -1,13 +1,12 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { connectDB } from "@/lib/db";
-import bcrypt from "bcryptjs";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "PUT") {
     return res.status(405).json({ message: "Method not allowed" });
   }
 
-  const { id, fullname, username, email, role, no_hp, password } = req.body;
+  const { id, fullname, username, email, role, no_hp } = req.body;
 
   if (!id || !fullname || !username || !email || !role) {
     return res.status(400).json({ message: "Semua field wajib diisi (kecuali no_hp opsional)" });
@@ -23,46 +22,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const conn = await connectDB();
+    const conn = connectDB();
 
-    const [existingUsername] = await conn.execute(
-      "SELECT id FROM users WHERE username = ? AND id != ?",
-      [username, id]
-    );
+    const [existingUsername] = await conn.execute("SELECT id FROM users WHERE username = ? AND id != ?", [username, id]);
 
     if ((existingUsername as any[]).length > 0) {
       return res.status(400).json({ message: "Username sudah digunakan oleh pengguna lain" });
     }
 
-    const [existingEmail] = await conn.execute(
-      "SELECT id FROM users WHERE email = ? AND id != ?",
-      [email, id]
-    );
+    const [existingEmail] = await conn.execute("SELECT id FROM users WHERE email = ? AND id != ?", [email, id]);
 
     if ((existingEmail as any[]).length > 0) {
       return res.status(400).json({ message: "Email sudah digunakan oleh pengguna lain" });
     }
 
-    let query = "";
-    let params: any[] = [];
+    await conn.execute(`UPDATE users SET fullname = ?, username = ?, email = ?, role = ?, no_hp = ? WHERE id = ?`, [fullname, username, email, role, no_hp || null, id]);
 
-    if (password && password.trim() !== "") {
-      // Hash password baru
-      const hashedPassword = await bcrypt.hash(password, 10);
-      query = `UPDATE users SET fullname = ?, username = ?, email = ?, role = ?, no_hp = ?, password = ? WHERE id = ?`;
-      params = [fullname, username, email, role, no_hp || null, hashedPassword, id];
-    } else {
-      query = `UPDATE users SET fullname = ?, username = ?, email = ?, role = ?, no_hp = ? WHERE id = ?`;
-      params = [fullname, username, email, role, no_hp || null, id];
-    }
+    const [updatedUsers] = await conn.execute("SELECT id, fullname, username, email, role, no_hp FROM users WHERE id = ?", [id]);
 
-    await conn.execute(query, params);
-
-    // Ambil user yang sudah diupdate untuk dikembalikan
-    const [updatedUsers] = await conn.execute(
-      "SELECT id, fullname, username, email, role, no_hp FROM users WHERE id = ?",
-      [id]
-    );
     const updatedUser = (updatedUsers as any[])[0];
 
     return res.status(200).json(updatedUser);

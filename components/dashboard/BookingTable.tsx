@@ -110,7 +110,7 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings, filterStatus, rol
         </table>
 
         {/* Modal Detail */}
-        <AnimatePresence mode="wait">{selectedBooking && <BookingDetailModal key={index} booking={selectedBooking} index={index} onClose={handleCloseModal} />}</AnimatePresence>
+        <AnimatePresence mode="wait">{selectedBooking && <BookingDetailModal key={index} booking={selectedBooking} index={index} role={role} onClose={handleCloseModal} />}</AnimatePresence>
       </div>
     </div>
   );

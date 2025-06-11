@@ -1,3 +1,4 @@
+// PRRR
 import React, { useEffect, useState } from "react";
 import DashboardLayout from "@/layout/DashboardLayout";
 import Toast from "@/components/toast/Toast";
@@ -100,7 +101,7 @@ export default function BookingPage() {
                   onClick={() => setSelectedFacility(facility)}
                   className={`cursor-pointer border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition ${selectedFacility?.id === facility.id ? "ring-2 ring-green-500" : ""}`}
                 >
-                  <Image src={facility.field_image} alt={facility.field_name} width={300} height={200} className="object-cover w-full h-32" />
+                  <Image src={`/assets/field/${facility.field_image}`} alt={facility.field_name} width={300} height={200} className="object-cover w-full h-32" />
                   <div className="p-2">
                     <h3 className="font-semibold text-gray-600 text-sm">{facility.field_name}</h3>
                     <p className="text-xs text-gray-600">Rp {facility.price_per_session.toLocaleString("id-ID")}/sesi</p>

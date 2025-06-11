@@ -100,7 +100,7 @@ const AdminDashboard = () => {
 
         <section>
           <h2 className="text-lg font-semibold text-gray-800 mb-4">Booking Table</h2>
-          <ResponsiveBookingView bookings={bookings} filterStatus={filterStatus} setFilterStatus={setFilterStatus} role={user.user?.role ?? "member"} />
+          <ResponsiveBookingView bookings={bookings} filterStatus={filterStatus} setFilterStatus={setFilterStatus} role={user?.user?.role ?? "member"} />
         </section>
       </DashboardLayout>
     </>

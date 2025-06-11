@@ -18,13 +18,14 @@ type Props = {
   booking: Booking | null;
   onClose: () => void;
   index: number;
+  role: string;
 };
 
 const nomorRek = "123456789012345";
 const noHP = "081249217968";
 const namaPemilik = "PT. JTI Sport Center";
 
-const BookingDetailModal: React.FC<Props> = ({ booking, onClose, index }) => {
+const BookingDetailModal: React.FC<Props> = ({ booking, onClose, index, role }) => {
   const [countdown, setCountdown] = useState(30 * 60);
   const router = useRouter();
   const isBank = booking?.transaction?.payment_method ? ["BNI", "BCA", "BRI", "Mandiri"].includes(booking?.transaction?.payment_method) : false;
@@ -184,13 +185,12 @@ const BookingDetailModal: React.FC<Props> = ({ booking, onClose, index }) => {
           <DetailItem label="Total Bayar" value={`Rp ${booking.total_price.toLocaleString("id-ID")}`} highlight />
         </div>
 
-        {booking.booking_status === "pending" && renderPendingInfo()}
-
+        {role === "member" && <>{booking.booking_status === "pending" && renderPendingInfo()}</>}
         <div className="mt-8 flex flex-col sm:flex-row justify-end gap-3">
           <button onClick={onClose} className="px-5 py-3 border border-gray-300 hover:bg-gray-100 rounded-xl transition text-gray-700 font-medium w-full sm:w-auto cursor-pointer">
             Tutup
           </button>
-          {renderFooterButton()}
+          {role === "member" && <>{renderFooterButton()}</>}
         </div>
       </motion.div>
     </motion.div>

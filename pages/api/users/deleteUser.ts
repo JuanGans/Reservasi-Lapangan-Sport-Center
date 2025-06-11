@@ -9,7 +9,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (!id) return res.status(400).json({ message: "Id user wajib disertakan" });
 
   try {
-    const conn = await connectDB();
+    const conn = connectDB();
     const [result] = await conn.execute("DELETE FROM users WHERE id = ?", [id]);
 
     // Optional: Check affectedRows if you want to confirm deletion

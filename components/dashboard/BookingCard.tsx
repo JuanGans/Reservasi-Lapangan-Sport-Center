@@ -49,7 +49,7 @@ const BookingListCard: React.FC<BookingListCardProps> = ({ bookings, filterStatu
       )}
 
       {/* Modal Detail */}
-      <AnimatePresence mode="wait">{selectedBooking && <BookingDetailModal key={index} booking={selectedBooking} index={index} onClose={handleCloseModal} />}</AnimatePresence>
+      <AnimatePresence mode="wait">{selectedBooking && <BookingDetailModal key={index} booking={selectedBooking} index={index} role={role} onClose={handleCloseModal} />}</AnimatePresence>
     </div>
   );
 };
