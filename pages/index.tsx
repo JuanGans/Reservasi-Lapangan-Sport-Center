@@ -114,7 +114,7 @@ export default function Home() {
             </LandingAnimation>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {Array.isArray(facilities) &&
               facilities.slice(0, 6).map((field) => (
                 <LandingAnimation key={field.id} delay={field.id * 0.1}>
@@ -125,7 +125,23 @@ export default function Home() {
                   </div>
                 </LandingAnimation>
               ))}
-          </div>
+          </div> */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+  {Array.isArray(facilities) &&
+    facilities.slice(0, 6).map((field) => (
+      <LandingAnimation key={field.id} delay={field.id * 0.1}>
+        <div className="bg-white shadow-md rounded-lg p-4 hover:scale-105 transition cursor-pointer overflow-hidden h-full flex flex-col" onClick={() => setSelectedField(field)}>
+          <img 
+            src={field.field_image ? `/assets/field/${field.field_image}` : "/fallback.jpg"} 
+            alt={field.field_name} 
+            className="rounded-md mb-3 w-full h-48 object-cover flex-shrink-0" 
+          />
+          <h3 className="text-blue-900 font-bold mb-2 flex-shrink-0">{field.field_name}</h3>
+          <p className="text-gray-600 text-sm flex-grow">{field.field_desc}</p>
+        </div>
+      </LandingAnimation>
+    ))}
+</div>
 
           <LandingAnimation>
             <div className="mt-10 text-center">
