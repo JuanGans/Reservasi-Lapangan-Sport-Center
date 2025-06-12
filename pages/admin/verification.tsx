@@ -29,19 +29,21 @@ const AdminListPage: React.FC = () => {
   return (
     <>
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
-      {selectedBooking && (
-        <DetailModal
-          booking={selectedBooking}
-          onClose={() => setSelectedBooking(null)}
-          onSuccess={(msg) => {
-            setToast({ message: msg, type: "success" });
-            setSelectedBooking(null);
-          }}
-          onError={(msg) => {
-            setToast({ message: msg, type: "error" });
-          }}
-        />
-      )}
+      <AnimatePresence>
+        {selectedBooking && (
+          <DetailModal
+            booking={selectedBooking}
+            onClose={() => setSelectedBooking(null)}
+            onSuccess={(msg) => {
+              setToast({ message: msg, type: "success" });
+              setSelectedBooking(null);
+            }}
+            onError={(msg) => {
+              setToast({ message: msg, type: "error" });
+            }}
+          />
+        )}
+      </AnimatePresence>
 
       <DashboardLayout title="Verifikasi Booking">
         <motion.h2 className="text-xl sm:text-2xl font-bold text-blue-900 mb-4 mt-8" initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>

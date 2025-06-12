@@ -27,6 +27,7 @@ export type Booking = {
   transaction?: {
     id: number;
     payment_method: string;
+    payment_proof: string;
   };
   sessions?: BookingSession[];
 };
