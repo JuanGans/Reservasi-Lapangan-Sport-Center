@@ -1,10 +1,11 @@
+// pages/api/testDB.ts
 import type { NextApiRequest, NextApiResponse } from "next";
 import { connectDB } from "@/lib/db";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     const db = connectDB();
-    const [rows] = await db.query("SELECT NOW() AS `waktu_sekarang`");
+    const [rows] = await db.query("SELECT NOW() AS waktu_sekarang");
 
     res.status(200).json({
       message: "Berhasil terhubung ke database!",
