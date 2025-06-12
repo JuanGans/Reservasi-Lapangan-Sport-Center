@@ -27,6 +27,8 @@ const namaPemilik = "PT. JTI Sport Center";
 
 const BookingDetailModal: React.FC<Props> = ({ booking, onClose, index, role }) => {
   const [countdown, setCountdown] = useState(30 * 60);
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState("");
   const router = useRouter();
   const isBank = booking?.transaction?.payment_method ? ["BNI", "BCA", "BRI", "Mandiri"].includes(booking?.transaction?.payment_method) : false;
   const [routing, setRouting] = useState("");
@@ -56,7 +58,6 @@ const BookingDetailModal: React.FC<Props> = ({ booking, onClose, index, role }) 
       if (diffInSeconds <= 0) {
         clearInterval(interval);
         setCountdown(0);
-        // Batalkan booking otomatis
         expiredBooking();
       } else {
         setCountdown(diffInSeconds);
@@ -71,16 +72,36 @@ const BookingDetailModal: React.FC<Props> = ({ booking, onClose, index, role }) 
       if (!booking) return;
 
       await fetch(`/api/bookings/expiredBooking/${booking.id}`, {
-        method: "POST", // atau "PUT" tergantung API-mu
+        method: "POST",
       });
 
       localStorage.removeItem("latestBookingId");
       localStorage.removeItem("latestTransactionId");
-
-      // router.replace("/member?BookingExpired=1");
       return;
     } catch (err) {
       console.error("Gagal membatalkan booking:", err);
+    }
+  };
+
+  const handleSubmitReview = async () => {
+    try {
+      if (!booking) return;
+
+      await fetch(`/api/bookings/reviewFacility`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          bookingId: booking.id,
+          rating,
+          comment,
+        }),
+      });
+
+      onClose();
+    } catch (err) {
+      console.error("Gagal mengirim ulasan:", err);
     }
   };
 
@@ -128,7 +149,7 @@ const BookingDetailModal: React.FC<Props> = ({ booking, onClose, index, role }) 
           <button
             onClick={() => {
               localStorage.setItem("latestBookingId", booking.id.toString());
-              if (routing == "payment" && booking.transaction?.id) {
+              if (routing === "payment" && booking.transaction?.id) {
                 localStorage.setItem("latestTransactionId", booking.transaction.id.toString());
               }
               router.push(`/member/booking/${routing}`);
@@ -138,17 +159,36 @@ const BookingDetailModal: React.FC<Props> = ({ booking, onClose, index, role }) 
             Lanjut ke Pembayaran
           </button>
         );
-      // case "paid":
-      //   return (
-      //     <button onClick={() => alert("Hubungi admin untuk pembatalan")} className="px-5 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl transition w-full sm:w-auto cursor-pointer">
-      //       Batal Booking
-      //     </button>
-      //   );
       case "review":
         return (
-          <button onClick={() => alert("Arahkan ke halaman ulasan")} className="px-5 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-xl transition w-full sm:w-auto cursor-pointer">
-            Beri Ulasan
-          </button>
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <span className="text-gray-700">Rating:</span>
+              <div className="flex gap-1">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button key={star} onClick={() => setRating(star)} className={`text-2xl ${rating >= star ? "text-yellow-400" : "text-gray-300"}`}>
+                    ★
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <textarea
+              placeholder="Tulis ulasan Anda..."
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              rows={4}
+            />
+
+            <button onClick={onClose} className="px-5 py-3 mr-3 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-xl transition w-full sm:w-auto cursor-pointer">
+              Tutup
+            </button>
+
+            <button onClick={handleSubmitReview} className="px-5 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-xl transition w-full sm:w-auto cursor-pointer">
+              Kirim Ulasan
+            </button>
+          </div>
         );
       default:
         return null;
@@ -187,9 +227,11 @@ const BookingDetailModal: React.FC<Props> = ({ booking, onClose, index, role }) 
 
         {role === "member" && <>{booking.booking_status === "pending" && renderPendingInfo()}</>}
         <div className="mt-8 flex flex-col sm:flex-row justify-end gap-3">
-          <button onClick={onClose} className="px-5 py-3 border border-gray-300 hover:bg-gray-100 rounded-xl transition text-gray-700 font-medium w-full sm:w-auto cursor-pointer">
-            Tutup
-          </button>
+          {role === "member" && booking.booking_status !== "review" && (
+            <button onClick={onClose} className="px-5 py-3 border border-gray-300 hover:bg-gray-100 rounded-xl transition text-gray-700 font-medium w-full sm:w-auto cursor-pointer">
+              Tutup
+            </button>
+          )}
           {role === "member" && <>{renderFooterButton()}</>}
         </div>
       </motion.div>

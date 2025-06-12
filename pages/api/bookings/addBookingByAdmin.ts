@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { getUserFromToken } from "@/lib/getUserFromToken"; // Pastikan path sesuai proyekmu
 import { prisma } from "@/lib/prisma";
+import { Role } from "@prisma/client";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") {
@@ -55,6 +56,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       },
       include: {
         facility: true,
+        user: true,
       },
     });
 
@@ -69,6 +71,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       },
     });
 
+    const admins = await prisma.users.findMany({
+      where: { role: Role.admin }, // atau pakai UserRole.ADMIN jika enum
+    });
+
+    // Notifikasi untuk semua admin
+    if (admins.length > 0) {
+      await prisma.notifications.createMany({
+        data: admins.map((admin) => ({
+          userId: admin.id,
+          message: `⚠️ Booking oleh ${booking.user.username} untuk ${booking.facility.field_name} pada ${booking.booking_date} telah berhasil dibooking.`,
+          type: "info",
+          is_read: false,
+        })),
+        skipDuplicates: true,
+      });
+    }
     return res.status(200).json({ message: "Booking berhasil dibuat", booking });
   } catch (error: any) {
     console.error("Gagal membuat booking:", error);
