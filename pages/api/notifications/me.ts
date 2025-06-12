@@ -1,9 +1,7 @@
 // /pages/api/notifications/me.ts
 import { NextApiRequest, NextApiResponse } from "next";
 import { getUserFromToken } from "@/lib/getUserFromToken";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "GET") return res.status(405).end("Method Not Allowed");

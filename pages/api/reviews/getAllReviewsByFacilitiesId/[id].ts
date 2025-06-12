@@ -1,8 +1,6 @@
 // pages/api/reviews.ts (Next.js API route)
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import type { NextApiRequest, NextApiResponse } from "next";
-
-const prisma = new PrismaClient();
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const facilityId = parseInt(req.query.id as string);
