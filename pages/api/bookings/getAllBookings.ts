@@ -13,6 +13,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         user: true,
         facility: true,
         sessions: true,
+        transaction: true,
       },
     });
 

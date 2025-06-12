@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Booking } from "@/types/booking";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 
 interface DetailModalProps {
   booking: Booking;
@@ -40,6 +40,13 @@ const DetailModal: React.FC<DetailModalProps> = ({ booking, onClose, onSuccess, 
       onError(err.message);
     }
   };
+
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, []);
 
   return (
     <motion.div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center px-4" variants={backdropVariant} initial="hidden" animate="visible" exit="hidden">
