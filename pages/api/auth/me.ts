@@ -24,7 +24,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     const db = connectDB();
-    const [rows] = (await db.execute("SELECT id, fullname, username, email, no_hp, user_img, role FROM users WHERE id = ?", [user.id])) as [UserData[], any];
+    const [rows] = (await db.execute("SELECT id, fullname, username, email, no_hp, user_img, role FROM Users WHERE id = ?", [user.id])) as [UserData[], any];
 
     return res.status(200).json(rows[0]); // akan mengandung id, fullname, email, username, no_hp, role
   } catch (err) {

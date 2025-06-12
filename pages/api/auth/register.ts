@@ -38,8 +38,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     try {
       const connection = connectDB();
-      const [usernameRows] = await connection.execute("SELECT id FROM users WHERE username = ?", [username]);
-      const [emailRows] = await connection.execute("SELECT id FROM users WHERE email = ?", [email]);
+      const [usernameRows] = await connection.execute("SELECT id FROM Users WHERE username = ?", [username]);
+      const [emailRows] = await connection.execute("SELECT id FROM Users WHERE email = ?", [email]);
 
       if (Array.isArray(usernameRows) && usernameRows.length > 0) {
         return res.status(400).json({ message: "Username sudah digunakan" });
@@ -79,7 +79,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
       }
 
-      await connection.execute("INSERT INTO users (fullname, username, email, password, no_hp, user_img) VALUES (?, ?, ?, ?, ?, ?)", [fullname, username, email, hashedPassword, no_hp, user_img]);
+      await connection.execute("INSERT INTO Users (fullname, username, email, password, no_hp, user_img) VALUES (?, ?, ?, ?, ?, ?)", [fullname, username, email, hashedPassword, no_hp, user_img]);
 
       return res.status(201).json({ message: "Registrasi berhasil" });
     } catch (error) {

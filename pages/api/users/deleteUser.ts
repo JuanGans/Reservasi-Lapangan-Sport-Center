@@ -10,7 +10,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     const conn = connectDB();
-    const [result] = await conn.execute("DELETE FROM users WHERE id = ?", [id]);
+    const [result] = await conn.execute("DELETE FROM Users WHERE id = ?", [id]);
 
     // Optional: Check affectedRows if you want to confirm deletion
     return res.status(200).json({ message: "User berhasil dihapus" });

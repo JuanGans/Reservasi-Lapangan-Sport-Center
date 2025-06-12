@@ -31,7 +31,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // Query user password dari DB
-    const [rows]: any = await connection.execute("SELECT password FROM users WHERE id = ?", [userId]);
+    const [rows]: any = await connection.execute("SELECT password FROM Users WHERE id = ?", [userId]);
     if (rows.length === 0) {
       return res.status(404).json({ message: "User tidak ditemukan" });
     }
@@ -47,7 +47,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
     // Update password
-    await connection.execute("UPDATE users SET password = ? WHERE id = ?", [hashedPassword, userId]);
+    await connection.execute("UPDATE Users SET password = ? WHERE id = ?", [hashedPassword, userId]);
 
     return res.status(200).json({ message: "Password berhasil diubah" });
   } catch (error: any) {

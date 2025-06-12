@@ -25,7 +25,7 @@ export default async function getCatalogById(req: NextApiRequest, res: NextApiRe
 
   try {
     const db = connectDB();
-    const [rows] = await db.execute("SELECT * FROM facilities WHERE id = ?", [id]);
+    const [rows] = await db.execute("SELECT * FROM Facilities WHERE id = ?", [id]);
 
     if (!Array.isArray(rows) || rows.length === 0) {
       return res.status(404).json({ message: "Lapangan tidak ditemukan" });

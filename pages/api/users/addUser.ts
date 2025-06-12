@@ -27,12 +27,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const db = connectDB();
 
     // Cek email/username ganda
-    const [usernameCheck] = await db.execute(`SELECT id FROM users WHERE username = ?`, [username]);
+    const [usernameCheck] = await db.execute(`SELECT id FROM Users WHERE username = ?`, [username]);
     if ((usernameCheck as any[]).length > 0) {
       return res.status(400).json({ message: "Username sudah digunakan." });
     }
 
-    const [emailCheck] = await db.execute(`SELECT id FROM users WHERE email = ?`, [email]);
+    const [emailCheck] = await db.execute(`SELECT id FROM Users WHERE email = ?`, [email]);
     if ((emailCheck as any[]).length > 0) {
       return res.status(400).json({ message: "Email sudah digunakan." });
     }
@@ -41,7 +41,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const [result] = await db.execute(
-      `INSERT INTO users (fullname, username, email, role, password, no_hp, user_img)
+      `INSERT INTO Users (fullname, username, email, role, password, no_hp, user_img)
        VALUES (?, ?, ?, ?, ?, ?, ?)`,
       [fullname, username, email, role || "member", hashedPassword, no_hp, "default-user.jpg"]
     );

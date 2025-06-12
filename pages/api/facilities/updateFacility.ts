@@ -64,7 +64,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     const db = connectDB();
 
     // Cari fasilitas berdasarkan id
-    const [rows]: any = await db.execute("SELECT * FROM facilities WHERE id = ?", [id]);
+    const [rows]: any = await db.execute("SELECT * FROM Facilities WHERE id = ?", [id]);
     if (rows.length === 0) {
       return res.status(404).json({ message: "Fasilitas tidak ditemukan" });
     }
@@ -97,7 +97,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     }
 
     // Query untuk mengupdate fasilitas
-    const updateQuery = imagePath ? `UPDATE facilities SET field_name = ?, field_desc = ?, price_per_session = ?, field_image = ? WHERE id = ?` : `UPDATE facilities SET field_name = ?, field_desc = ?, price_per_session = ? WHERE id = ?`;
+    const updateQuery = imagePath ? `UPDATE Facilities SET field_name = ?, field_desc = ?, price_per_session = ?, field_image = ? WHERE id = ?` : `UPDATE facilities SET field_name = ?, field_desc = ?, price_per_session = ? WHERE id = ?`;
 
     // Parameter untuk query update
     const updateParams = imagePath ? [field_name, field_desc, price_per_session, imagePath, id] : [field_name, field_desc, price_per_session, id];
@@ -106,7 +106,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     await db.execute(updateQuery, updateParams);
 
     // Ambil data fasilitas yang telah diupdate
-    const [updatedRows]: any = await db.execute("SELECT * FROM facilities WHERE id = ?", [id]);
+    const [updatedRows]: any = await db.execute("SELECT * FROM Facilities WHERE id = ?", [id]);
     const updated = updatedRows[0];
 
     // Kembalikan data fasilitas yang telah diupdate

@@ -33,7 +33,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const db = connectDB();
 
     // Ambil user_img lama
-    const [rows] = (await db.execute("SELECT user_img FROM users WHERE id = ?", [userId])) as [UserRow[], any];
+    const [rows] = (await db.execute("SELECT user_img FROM Users WHERE id = ?", [userId])) as [UserRow[], any];
     const user = rows[0];
 
     if (!user) {
@@ -49,7 +49,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // Hapus user dari database
-    await db.execute("DELETE FROM users WHERE id = ?", [userId]);
+    await db.execute("DELETE FROM Users WHERE id = ?", [userId]);
 
     // Hapus cookie token
     res.setHeader(

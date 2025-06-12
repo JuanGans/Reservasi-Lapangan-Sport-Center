@@ -3,7 +3,7 @@ import { connectDB } from "@/lib/db";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const db = await connectDB();
+    const db = connectDB();
     const [rows] = await db.query("SELECT NOW() AS `waktu_sekarang`");
 
     res.status(200).json({

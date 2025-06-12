@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { connectDB } from "@/lib/db";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const db = await connectDB();
+  const db = connectDB();
 
   if (req.method === "GET") {
     try {

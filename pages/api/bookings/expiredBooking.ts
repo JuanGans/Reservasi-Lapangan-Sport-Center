@@ -4,8 +4,9 @@ const prisma = new PrismaClient();
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") return res.status(405).end();
+  const { id } = req.body;
 
-  const bookingId = typeof req.query.id === "string" ? parseInt(req.query.id) : null;
+  const bookingId = typeof req.query.id === "string" ? parseInt(id) : null;
   if (!bookingId) return res.status(400).json({ error: "ID tidak valid" });
 
   try {

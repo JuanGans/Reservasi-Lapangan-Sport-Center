@@ -18,7 +18,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const db = await connectDB();
 
     // 1. Ambil data fasilitas untuk cek gambar
-    const [rows]: any = await db.execute(`SELECT field_image FROM facilities WHERE id = ?`, [id]);
+    const [rows]: any = await db.execute(`SELECT field_image FROM Facilities WHERE id = ?`, [id]);
 
     if (rows.length === 0) {
       return res.status(404).json({ message: "Fasilitas tidak ditemukan" });
@@ -35,7 +35,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // 3. Hapus data dari database
-    const [result]: any = await db.execute(`DELETE FROM facilities WHERE id = ?`, [id]);
+    const [result]: any = await db.execute(`DELETE FROM Facilities WHERE id = ?`, [id]);
 
     return res.status(200).json({ message: "Fasilitas berhasil dihapus" });
   } catch (error) {

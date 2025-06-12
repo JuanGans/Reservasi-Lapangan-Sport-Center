@@ -62,7 +62,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     const db = connectDB();
 
-    const [existingRows] = (await db.execute("SELECT user_img FROM users WHERE id = ?", [id])) as [UserImage[], any];
+    const [existingRows] = (await db.execute("SELECT user_img FROM Users WHERE id = ?", [id])) as [UserImage[], any];
     const existingUser = existingRows[0];
 
     if (!existingUser) {
@@ -70,7 +70,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // Cek apakah username sudah dipakai user lain selain user ini
-    const [usernameCheckRows]: any = await db.execute("SELECT id FROM users WHERE username = ? AND id != ?", [username, id]);
+    const [usernameCheckRows]: any = await db.execute("SELECT id FROM Users WHERE username = ? AND id != ?", [username, id]);
 
     if (Array.isArray(usernameCheckRows) && usernameCheckRows.length > 0) {
       return res.status(409).json({ message: "Username sudah digunakan oleh pengguna lain" });
@@ -99,9 +99,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     }
 
-    await db.execute("UPDATE users SET fullname = ?, username = ?, email = ?, no_hp = ?, user_img = ? WHERE id = ?", [fullname, username, email, no_hp, user_img, id]);
+    await db.execute("UPDATE Users SET fullname = ?, username = ?, email = ?, no_hp = ?, user_img = ? WHERE id = ?", [fullname, username, email, no_hp, user_img, id]);
 
-    const [rows]: any = await db.execute("SELECT id, fullname, username, email, no_hp, user_img, role FROM users WHERE id = ?", [id]);
+    const [rows]: any = await db.execute("SELECT id, fullname, username, email, no_hp, user_img, role FROM Users WHERE id = ?", [id]);
 
     if (!Array.isArray(rows) || rows.length === 0) {
       return res.status(404).json({ message: "User not found after update" });

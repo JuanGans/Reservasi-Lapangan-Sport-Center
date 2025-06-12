@@ -15,7 +15,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     const connection = connectDB();
 
-    const [rows] = await connection.execute("SELECT id FROM users WHERE email = ? OR no_hp = ?", [identifier, identifier]);
+    const [rows] = await connection.execute("SELECT id FROM Users WHERE email = ? OR no_hp = ?", [identifier, identifier]);
 
     if (!Array.isArray(rows) || rows.length === 0) {
       return res.status(404).json({ message: "Email atau nomor HP tidak ditemukan" });

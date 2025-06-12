@@ -21,6 +21,8 @@ model Users {
   role        Role           @default(member)
   bookings    Bookings[]
   notifications Notifications[]
+
+  @@map("Users")
 }
 
 // ENUM ROLE
@@ -38,7 +40,9 @@ model Facilities {
   price_per_session Decimal   @db.Decimal(10,2)
   avg_rating        Float     @default(0)
   total_review      Int       @default(0)
-  bookings          Bookings[]
+  bookings          Bookings[]  
+
+  @@map("Facilities")
 }
 
 // MODEL BOOKING
@@ -58,6 +62,8 @@ model Bookings {
   // notifications  Notifications[]
   created_at     DateTime         @default(now())
   updated_at     DateTime         @updatedAt
+
+  @@map("Bookings")
 }
 
 
@@ -80,6 +86,8 @@ model BookingSessions {
   start_time    DateTime
   end_time      DateTime
   session_label String   // Contoh: "08:00 - 09:00"
+
+  @@map("BookingSessions")
 }
 
 model Transactions {
@@ -93,6 +101,8 @@ model Transactions {
   payment_time    DateTime?
   created_at      DateTime          @default(now())
   updated_at      DateTime          @updatedAt
+
+  @@map("Transactions")
 }
 
 // ENUM PAYMENT METHOD
@@ -128,6 +138,8 @@ model Reviews {
   comment    String?
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
+
+  @@map("Reviews")
 }
 
 // MODEL NOTIFICATION
@@ -142,6 +154,8 @@ model Notifications {
   is_read        Boolean          @default(false)
   created_at     DateTime         @default(now())
   updated_at     DateTime         @updatedAt
+
+  @@map("Notifications")
 }
 
 // ENUM UNTUK NOTIFICATION TYPE

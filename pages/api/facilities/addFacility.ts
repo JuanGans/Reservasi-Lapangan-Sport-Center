@@ -92,7 +92,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
     const db = await connectDB();
 
-    const insertQuery = `INSERT INTO facilities (field_name, field_desc, price_per_session, field_image) VALUES (?, ?, ?, ?)`;
+    const insertQuery = `INSERT INTO Facilities (field_name, field_desc, price_per_session, field_image) VALUES (?, ?, ?, ?)`;
     const [result]: any = await db.execute(insertQuery, [field_name, field_desc, price_per_session, imagePath]);
 
     return res.status(201).json({

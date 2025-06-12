@@ -24,21 +24,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     const conn = connectDB();
 
-    const [existingUsername] = await conn.execute("SELECT id FROM users WHERE username = ? AND id != ?", [username, id]);
+    const [existingUsername] = await conn.execute("SELECT id FROM Users WHERE username = ? AND id != ?", [username, id]);
 
     if ((existingUsername as any[]).length > 0) {
       return res.status(400).json({ message: "Username sudah digunakan oleh pengguna lain" });
     }
 
-    const [existingEmail] = await conn.execute("SELECT id FROM users WHERE email = ? AND id != ?", [email, id]);
+    const [existingEmail] = await conn.execute("SELECT id FROM Users WHERE email = ? AND id != ?", [email, id]);
 
     if ((existingEmail as any[]).length > 0) {
       return res.status(400).json({ message: "Email sudah digunakan oleh pengguna lain" });
     }
 
-    await conn.execute(`UPDATE users SET fullname = ?, username = ?, email = ?, role = ?, no_hp = ? WHERE id = ?`, [fullname, username, email, role, no_hp || null, id]);
+    await conn.execute(`UPDATE Users SET fullname = ?, username = ?, email = ?, role = ?, no_hp = ? WHERE id = ?`, [fullname, username, email, role, no_hp || null, id]);
 
-    const [updatedUsers] = await conn.execute("SELECT id, fullname, username, email, role, no_hp FROM users WHERE id = ?", [id]);
+    const [updatedUsers] = await conn.execute("SELECT id, fullname, username, email, role, no_hp FROM Users WHERE id = ?", [id]);
 
     const updatedUser = (updatedUsers as any[])[0];
 
