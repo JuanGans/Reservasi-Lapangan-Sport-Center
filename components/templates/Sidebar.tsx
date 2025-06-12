@@ -169,7 +169,7 @@ const Sidebar: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             {navItem(`/${role.toLowerCase()}/users`, "fas fa-users", "Pengguna")}
             {navItem(`/${role.toLowerCase()}/booking`, "fas fa-calendar-check", "Booking")}
             {navItem(`/${role.toLowerCase()}/verification`, "fas fa-check", "Verification List")}
-            {navItem(`/${role.toLowerCase()}/transaction`, "fas fa-file-alt", "Transaksi")}
+            {/* {navItem(`/${role.toLowerCase()}/transaction`, "fas fa-file-alt", "Transaksi")} */}
           </>
         )}
       </nav>
