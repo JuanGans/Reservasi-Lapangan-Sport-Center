@@ -85,7 +85,7 @@ const AdminDashboard = () => {
 
         {/* Filter Status Booking */}
         <div className="my-6">
-          <label className="mr-2 text-blue-900 font-semibold">Filter Status:</label>
+          <label className="mr-2 text-blue-900 font-semibold">Filter Status Booking:</label>
           <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value as BookingStatus)} className="border border-gray-300 rounded-md p-2 text-gray-500 text-xs cursor-pointer">
             <option value="all">Semua</option>
             <option value="pending">Menunggu Pembayaran</option>
