@@ -17,7 +17,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         sessions: true,
       },
     });
-    
+
     res.status(200).json(bookings);
   } catch (error) {
     console.error("Error fetching bookings:", error);
