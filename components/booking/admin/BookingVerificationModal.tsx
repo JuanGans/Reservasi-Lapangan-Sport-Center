@@ -83,7 +83,7 @@ const DetailModal: React.FC<DetailModalProps> = ({ booking, onClose, onSuccess, 
             <div className="sm:col-span-2">
               <p className="font-medium mb-1">Bukti Pembayaran</p>
               <a href={booking.transaction.payment_proof} target="_blank" rel="noopener noreferrer">
-                <img src={booking.transaction.payment_proof} alt="Bukti Pembayaran" className="w-full max-h-64 object-contain rounded-md border shadow-md hover:shadow-lg transition" />
+                <img src={`/assets/proof/${booking.transaction.payment_proof}`} alt="Bukti Pembayaran" className="w-full max-h-64 object-contain rounded-md border shadow-md hover:shadow-lg transition" />
               </a>
             </div>
           )}
