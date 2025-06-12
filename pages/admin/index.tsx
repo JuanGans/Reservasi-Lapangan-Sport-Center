@@ -1,15 +1,18 @@
-// pages/admin/dashboard.tsx
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import DashboardLayout from "@/layout/DashboardLayout";
 import Toast from "@/components/toast/Toast";
 import StatsCard from "@/components/admin/StatsCard";
-import TopUsers from "@/components/admin/TopUsers";
-import BookingsChart from "@/components/admin/BookingsChart";
-import ResponsiveBookingView from "@/components/dashboard/ResponsiveBooking";
-import { Booking } from "@/types/booking";
 import { useUser } from "@/context/UserContext";
-import { BookingStatus } from "@/types/booking";
+
+// Tipe data
+import { Booking } from "@/types/booking";
+import { User } from "@/types/user";
+import { Facility } from "@/types/facility";
+import { Review } from "@/types/review";
+import { Transaction } from "@/types/transaction";
+import { Notification } from "@/types/notification";
+import { BookingSession } from "@/types/session";
 
 interface ToastState {
   message: string;
@@ -18,13 +21,20 @@ interface ToastState {
 
 const AdminDashboard = () => {
   const [toast, setToast] = useState<ToastState | null>(null);
-  const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
-  const [chartData, setChartData] = useState<{ name: string; booking: number }[]>([]);
-  const [filterStatus, setFilterStatus] = useState<BookingStatus>("all");
   const user = useUser();
 
+  // Semua data tabel
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [facilities, setFacilities] = useState<Facility[]>([]);
+  const [sessions, setSessions] = useState<BookingSession[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+
+  // Error handler query
   useEffect(() => {
     const { restricted, repeat } = router.query;
     if (restricted === "1") {
@@ -36,72 +46,68 @@ const AdminDashboard = () => {
     }
   }, [router]);
 
+  // Fetch semua data sekaligus
   useEffect(() => {
-    async function fetchBookings() {
+    async function fetchAllData() {
       try {
-        const res = await fetch("/api/bookings/getAllBookings");
-        const data = await res.json();
-        setBookings(data);
+        const [
+          bookingsRes,
+          usersRes,
+          facilitiesRes,
+          sessionsRes,
+          notificationsRes,
+          reviewsRes,
+          transactionsRes,
+        ] = await Promise.all([
+          fetch("/api/bookings/getAllBookings"),
+          fetch("/api/users"),
+          fetch("/api/facilities/getAllFacilities"),
+          fetch("/api/sessions/getAllSessions"),
+          fetch("/api/notifications/getAll"),
+          fetch("/api/reviews/getAll"),
+          fetch("/api/transactions/getAll"),
+        ]);
+
+        if (!bookingsRes.ok) throw new Error("Gagal load bookings");
+        if (!usersRes.ok) throw new Error("Gagal load users");
+
+        setBookings(await bookingsRes.json());
+        setUsers(await usersRes.json());
+        setFacilities(await facilitiesRes.json());
+        setSessions(await sessionsRes.json());
+        setNotifications(await notificationsRes.json());
+        setReviews(await reviewsRes.json());
+        setTransactions(await transactionsRes.json());
       } catch (err) {
-        setToast({ message: "Gagal memuat data booking", type: "error" });
+        setToast({ message: `Gagal memuat data: ${err}`, type: "error" });
       } finally {
         setLoading(false);
       }
     }
-    fetchBookings();
+
+    fetchAllData();
   }, []);
-
-  const totalBookings = bookings.length;
-  const paidBookings = bookings.filter((b) => b.booking_status === "confirmed" || b.booking_status === "completed").length;
-  const canceledBookings = bookings.filter((b) => b.booking_status === "canceled" || b.booking_status === "expired").length;
-  const totalRevenue = bookings.filter((b) => b.booking_status === "confirmed" || b.booking_status === "completed").reduce((sum, b) => sum + b.total_price, 0);
-
-  const userBookingCount: Record<string, number> = {};
-  bookings.forEach((b) => {
-    const uname = b.user?.username;
-    if (uname) userBookingCount[uname] = (userBookingCount[uname] || 0) + 1;
-  });
-
-  const topUsers = Object.entries(userBookingCount)
-    .map(([username, count]) => ({ username, bookings: count }))
-    .sort((a, b) => b.bookings - a.bookings)
-    .slice(0, 3);
 
   return (
     <>
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
       <DashboardLayout title="Dashboard Admin">
         <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 mt-6">
-          <StatsCard label="Total Booking" value={totalBookings} color="text-blue-700" />
-          <StatsCard label="Booking Berhasil" value={paidBookings} color="text-green-600" />
-          <StatsCard label="Dibatalkan" value={canceledBookings} color="text-red-600" />
-          <StatsCard label="Pendapatan" value={`Rp. ${totalRevenue.toLocaleString()}`} color="text-yellow-600" />
+          <StatsCard label="Total Users" value={users.length} color="text-blue-700" />
+          <StatsCard label="Total Bookings" value={bookings.length} color="text-green-600" />
+          <StatsCard label="Total Facilities" value={facilities.length} color="text-yellow-600" />
+          <StatsCard label="Total Sessions" value={sessions.length} color="text-purple-600" />
         </section>
 
-        <section className="mb-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <BookingsChart bookings={bookings} />
-          <TopUsers users={topUsers} />
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          <StatsCard label="Total Notifications" value={notifications.length} color="text-indigo-600" />
+          <StatsCard label="Total Reviews" value={reviews.length} color="text-pink-600" />
+          <StatsCard label="Total Transactions" value={transactions.length} color="text-red-600" />
         </section>
 
-        {/* Filter Status Booking */}
-        <div className="my-6">
-          <label className="mr-2 text-blue-900 font-semibold">Filter Status:</label>
-          <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value as BookingStatus)} className="border border-gray-300 rounded-md p-2 text-gray-500 text-xs cursor-pointer">
-            <option value="all">Semua</option>
-            <option value="pending">Menunggu Pembayaran</option>
-            <option value="paid">Selesai Membayar</option>
-            <option value="confirmed">Booking Sukses</option>
-            <option value="canceled">Booking Ditolak</option>
-            <option value="expired">Pembayaran Kadaluarsa</option>
-            <option value="review">Menunggu Review</option>
-            <option value="completed">Selesai</option>
-          </select>
-        </div>
-
-        <section>
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">Booking Table</h2>
-          <ResponsiveBookingView bookings={bookings} filterStatus={filterStatus} setFilterStatus={setFilterStatus} role={user?.user?.role ?? "member"} />
-        </section>
+        <p className="text-sm text-gray-500">
+          Data dimuat secara paralel dari semua tabel. Kamu bisa menambahkan tabel detail atau chart tambahan di bawah.
+        </p>
       </DashboardLayout>
     </>
   );
