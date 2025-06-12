@@ -19,3 +19,4 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     res.status(500).json({ message: "Gagal memuat data sessions", error });
   }
 }
+// This API endpoint retrieves all booking sessions from the BookingSessions table.
